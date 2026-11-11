@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dolle Diva Intern v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --canvas:#EEF0F2; --page:#FFFFFF; --ink:#202124; --ink-2:#5F6368; --ink-3:#80868B; --rule:#E3E5E8; --rule-2:#F1F3F4;
+  --coral:#E96C59; --bordeaux:#891729; --blush:#F9CECA; --cream:#FEF8F9;
+  --good:#188038; --good-bg:#E6F4EA; --warn:#B06000; --warn-bg:#FEF7E0; --bad:#C5221F; --bad-bg:#FCE8E6; --info:#1A5FB4; --info-bg:#E8F0FE;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--canvas)}
+body{font-family:Roboto,system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+code,.mono{font-family:"Roboto Mono",ui-monospace,monospace;font-size:12.5px}
+.appbar{position:sticky;top:0;z-index:10;background:#fff;border-top:4px solid var(--bordeaux);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:14px;padding:10px 20px;flex-wrap:wrap}
+.badge{width:40px;height:40px;border-radius:10px;background:var(--bordeaux);display:grid;place-items:center;flex:none}
+.badge svg{width:22px;height:auto}
+.titles{flex:1;min-width:220px}
+.titles h1{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:20px;letter-spacing:-.01em;line-height:1.1}
+.titles h1 small{font-family:Roboto,sans-serif;font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:#fff;border-radius:4px;padding:2px 6px;margin-left:8px;vertical-align:3px}
+.titles p{font-size:12px;color:var(--ink-2)}
+.meta{font-size:12px;color:var(--ink-2);text-align:right}
+.tabs{background:#fff;border-bottom:1px solid var(--rule);display:flex;gap:4px;padding:0 20px;overflow-x:auto}
+.tab{border:0;background:none;font:500 14px Roboto,sans-serif;color:var(--ink-2);padding:12px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--bordeaux);border-bottom-color:var(--coral)}
+.page{max-width:1240px;margin:14px auto 40px;padding:0 16px}
+.sheet{background:var(--page);border-radius:8px;box-shadow:0 1px 2px rgba(60,64,67,.15),0 1px 3px 1px rgba(60,64,67,.08);padding:22px}
+.section{display:none}.section.on{display:block}
+.grid{display:grid;gap:16px}
+.g-4{grid-template-columns:repeat(4,1fr)}.g-2{grid-template-columns:1fr 1fr}.g-21{grid-template-columns:1.5fr 1fr}
+.mt{margin-top:18px}
+.comp{border:1px solid var(--rule);border-radius:8px;padding:14px 16px;background:#fff;min-width:0}
+.comp h3{font-size:14px;font-weight:500;margin-bottom:2px}
+.comp .sub{font-size:12px;color:var(--ink-3);margin-bottom:10px}
+h2.sec{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:18px;color:var(--bordeaux);margin:0 0 4px}
+p.intro{color:var(--ink-2);font-size:13px;margin-bottom:14px;max-width:90ch}
+/* status chips (icon + label, never colour alone) */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chip.ok{color:var(--good);background:var(--good-bg)}.chip.ok::before{content:"✓"}
+.chip.warn{color:var(--warn);background:var(--warn-bg)}.chip.warn::before{content:"!"}
+.chip.bad{color:var(--bad);background:var(--bad-bg)}.chip.bad::before{content:"✕"}
+.chip.todo{color:var(--ink-2);background:var(--rule-2)}.chip.todo::before{content:"○"}
+.chip.info{color:var(--info);background:var(--info-bg)}.chip.info::before{content:"i"}
+/* source health tiles */
+.src{display:flex;flex-direction:column;gap:6px}
+.src .top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.src .nm{font-weight:500;font-size:15px}
+.src .id{font-size:12px;color:var(--ink-3)}
+.src .bar{height:6px;border-radius:3px;background:var(--rule-2);overflow:hidden;margin-top:4px}
+.src .bar b{display:block;height:100%;background:var(--coral);border-radius:3px}
+.src .pct{font-size:12px;color:var(--ink-2)}
+/* findings */
+.find{display:grid;grid-template-columns:96px 1fr;gap:4px 14px;padding:12px 0;border-bottom:1px solid var(--rule-2)}
+.find:last-child{border-bottom:0}
+.find h4{font-size:14px;font-weight:500}
+.find p{font-size:13px;color:var(--ink-2)}
+.find .fix{font-size:13px;color:var(--ink);margin-top:2px}
+/* tables */
+.tblwrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-weight:500;color:var(--ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);background:#FAFAFB;white-space:nowrap}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+.tbl tr:hover td{background:#FAFAFB}
+.tbl td.c{text-align:center}
+.yes{color:var(--good);font-weight:700}.no{color:var(--ink-3)}
+.tbl select{font:500 12px Roboto,sans-serif;border:1px solid var(--rule);border-radius:6px;padding:3px 6px;background:#fff;color:var(--ink)}
+/* checklist */
+.ck{display:grid;gap:2px}
+.ck label{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;padding:8px 6px;border-radius:6px;cursor:pointer}
+.ck label:hover{background:#FAFAFB}
+.ck input{width:16px;height:16px;margin-top:2px;accent-color:var(--bordeaux)}
+.ck .t{font-size:13.5px}.ck .t small{display:block;color:var(--ink-3);font-size:12px}
+.ck input:checked + .t{color:var(--ink-3);text-decoration:line-through}
+.ck .tag{font-size:11px;color:var(--ink-3);border:1px solid var(--rule);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.progress{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-2);margin-bottom:8px}
+.progress .bar{flex:1;height:6px;background:var(--rule-2);border-radius:3px;overflow:hidden}.progress .bar b{display:block;height:100%;background:var(--good)}
+/* flow diagram */
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:stretch;position:relative}
+.col h5{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;font-weight:500}
+.node{border:1px solid var(--rule);border-radius:8px;padding:9px 10px;margin-bottom:8px;background:#fff;font-size:13px;position:relative}
+.node b{display:block;font-weight:500}
+.node span{font-size:12px;color:var(--ink-3)}
+.node.k{border-color:var(--coral);background:#FFF6F4}
+.node.c{border-color:var(--bordeaux);background:var(--cream)}
+.node.o{border-style:dashed}
+.arrow{position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:14px}
+.chart{position:relative;height:220px}
+.demo{background:var(--warn-bg);border:1px solid #F6DFA6;color:#5c3b00;border-radius:8px;padding:8px 12px;font-size:12.5px;margin-bottom:12px}
+footer{max-width:1240px;margin:0 auto 30px;padding:0 16px;font-size:12px;color:var(--ink-3)}
+/* ---------- v2: controls, steering, split, creatives, health ---------- */
+.ctrls{display:flex;gap:10px;flex-wrap:wrap}
+.ctrl{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:6px;padding:6px 10px;background:#fff;font-size:13px;color:var(--ink-2)}
+.ctrl svg{width:16px;height:16px;fill:var(--ink-2)}
+.ctrl select{border:0;background:transparent;font:500 14px Roboto,sans-serif;color:var(--ink);cursor:pointer;outline:none}
+.tabsep{align-self:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:0 6px 0 14px;border-left:1px solid var(--rule);margin-left:6px;white-space:nowrap}
+.q{font-size:13px;color:var(--ink-3);margin-bottom:12px}.q b{color:var(--bordeaux);font-weight:500}
+.dm{display:inline-block;font-size:11px;font-weight:500;background:var(--warn-bg);color:#7a5200;border:1px solid #F6DFA6;border-radius:4px;padding:0 6px;margin-left:6px;vertical-align:2px}
+.score .lab{font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.score .val{font-size:28px;font-weight:500;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.score .ln{font-size:12px;color:var(--ink-3);margin-top:4px}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:500;padding:1px 6px;border-radius:4px;font-variant-numeric:tabular-nums}
+.delta.up{color:var(--good);background:var(--good-bg)}.delta.down{color:var(--bad);background:var(--bad-bg)}.delta.flat{color:var(--ink-2);background:var(--rule-2)}
+.chart{position:relative;height:240px}.chart.sm{height:190px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.legend i.dash{height:0;border-top:2px dashed var(--ink);border-radius:0;vertical-align:3px}
+.tbl.num td,.tbl.num th{text-align:right;font-variant-numeric:tabular-nums}
+.tbl.num td:first-child,.tbl.num th:first-child,.tbl.num td:nth-child(2),.tbl.num th:nth-child(2){text-align:left}
+.tbl.num td:last-child,.tbl.num th:last-child{text-align:left}
+.tbl th.s{cursor:pointer;user-select:none}
+.tbl th[aria-sort="descending"]::after{content:" ↓"}.tbl th[aria-sort="ascending"]::after{content:" ↑"}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.pace{display:grid;gap:8px;margin-top:6px}
+.pace .r{display:grid;grid-template-columns:90px 1fr 90px;gap:10px;align-items:center;font-size:13px}
+.pace .t{position:relative;height:10px;background:var(--rule-2);border-radius:5px}
+.pace .t b{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.pace .t i{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.pace .v{text-align:right;font-variant-numeric:tabular-nums}
+/* split */
+.vs-head{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chan{border-radius:10px;padding:16px 18px;color:#fff;position:relative;overflow:hidden}
+.chan.g{background:linear-gradient(135deg,#E0604C,#C94A37)}
+.chan.m{background:linear-gradient(135deg,#A8233A,#6E1426)}
+.chan .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.88}
+.chan h3{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:22px;margin:2px 0 4px;color:#fff}
+.chan p{font-size:13px;opacity:.94;max-width:44ch}
+.chan .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chan .tags span{font-size:12px;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px}
+.chan .big{position:absolute;right:16px;top:14px;text-align:right}
+.chan .big b{display:block;font-size:28px;font-weight:500;line-height:1}
+.chan .big span{font-size:12px;opacity:.88}
+.kpi-row{display:grid;grid-template-columns:170px 1fr 1fr;gap:16px;align-items:stretch;padding:14px 0;border-bottom:1px solid var(--rule-2)}
+.kpi-row:last-child{border-bottom:0}
+.kpi-name b{display:block;font-size:15px;font-weight:500}
+.kpi-name span{font-size:12px;color:var(--ink-3)}
+.bm{border:1px solid var(--rule);border-radius:8px;padding:10px 12px}
+.bm .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bm .val{font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.bm .norm{font-size:12px;color:var(--ink-3)}
+.track{position:relative;height:10px;border-radius:5px;background:var(--rule-2);margin:22px 0 6px}
+.track .zone{position:absolute;top:0;bottom:0;border-radius:5px;background:#CFEAD7}
+.track .mk{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.track .mk::after{content:attr(data-v);position:absolute;bottom:15px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:500;color:var(--ink);white-space:nowrap}
+.scale{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.bm .tip{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.signal{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);border:1px solid #F6DFA6;border-radius:8px;padding:9px 12px;font-size:13px;color:#5c3b00;margin-top:10px}
+.signal.ok{background:var(--good-bg);border-color:#BFE3C9;color:#0B5A24}
+.signal.bad{background:var(--bad-bg);border-color:#F4C7C3;color:#8A1512}
+textarea.neg{width:100%;min-height:120px;border:1px solid var(--rule);border-radius:6px;padding:8px;font:12.5px "Roboto Mono",monospace;resize:vertical}
+.btn{border:1px solid var(--rule);background:#fff;border-radius:6px;padding:6px 12px;font:500 13px Roboto,sans-serif;cursor:pointer;margin-top:8px}
+.btn:hover{background:#FAFAFB}
+@media (max-width:820px){.vs-head{grid-template-columns:1fr}.kpi-row{grid-template-columns:1fr}.chan .big{position:static;text-align:left;margin-top:10px}.pace .r{grid-template-columns:70px 1fr 80px}}
+
+@media (max-width:1000px){.g-4{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:1fr 1fr}.arrow{display:none}}
+@media (max-width:760px){.g-2,.g-21{grid-template-columns:1fr}}
+@media (max-width:520px){.g-4,.flow{grid-template-columns:1fr}.sheet{padding:14px}.find{grid-template-columns:1fr}.appbar{padding:10px 16px}}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="badge" aria-hidden="true"><svg viewBox="0 0 94 120" aria-label="Dolle Diva"><g fill="#fef8f9"><path d="M27.1,54.2c6.3,0,12.7-2.4,19.6-1.1-1.5-2.4-2.4-15.2-2.4-27.6s.6-21.5,2-24.7c-9,2.1-14.3-.8-22-.8C12.3,0,2,7.4,2,26.7s8.2,27.5,25.1,27.5ZM28.4,53.4c-7.8.3-10.6-17.7-10.6-28.2S20.7.6,28.4.8c.6,8.3,1,17.3,1,26.3s-.3,18-1,26.3Z"/><path d="M66.3,54.2c-6.3,0-12.7-2.4-19.6-1.1,1.5-2.4,2.4-15.2,2.4-27.6s-.6-21.5-2-24.7c9,2.1,14.3-.8,22-.8,12.1,0,22.4,7.4,22.4,26.7s-8.2,27.5-25.1,27.5ZM65,53.4c7.8.3,10.6-17.7,10.6-28.2S72.7.6,65,.8c-.6,8.300-1,17.3-1,26.3s.3,18,1,26.3Z"/><path d="M17.4,90c-1-1.5-1.5-6.6-1.5-11.7s.4-9.8,1.4-11.1c-3.5.3-8,1.3-11.6,1.3s-3.7-.3-4.9-1.3c-1.1,3.2,0,5.7,2.3,5.7s3.4-3.8,6.8-4.4c.4,2.5.7,6.5.8,9.4h-1.2c-1.7,0-4-1.6-5-3.6.3,2.5.3,5,0,7.5,1.4-2.5,3.4-3.5,5-3.5h1.2c0,3.6-.2,8-1,11C7.2,88.9,2.2,86.4,0,84v6.1c2.5-.2,5.7-.4,8.9-.4s5.8.1,8.500.4Z"/><path d="M33.6,90c-.9-1.3-1.8-7.2-1.8-12.8s.5-8.3,1.8-10c-1.5.3-2.9.4-4.4.4s-2.9-.1-4.4-.4c1.7,2.7,2.5,7.6,2.5,12.4s-.4,7.1-1.2,9.7c-1.9,0-6.2-2.5-7.6-5.3v6.1c2.5-.2,5.1-.4,7.8-.4s4.9.1,7.4.4Z"/><path d="M49.8,90c-.9-1.3-1.8-7.2-1.8-12.8s.5-8.3,1.8-10c-1.5.3-2.9.4-4.4.4s-2.9-.1-4.4-.4c1.7,2.7,2.5,7.6,2.5,12.4s-.4,7.1-1.2,9.7c-1.9,0-6.2-2.5-7.6-5.3v6.1c2.5-.2,5.1-.4,7.8-.4s4.9.1,7.4.4Z"/><path d="M61.8,90.5c7.2,0,10.5-5.1,10.5-11.8s-3.3-11.9-10.5-11.9-10.5,4.3-10.5,11.900,3.3,11.8,10.5,11.8ZM61.8,90.2c-2.3,0-3.3-5.8-3.3-11.5s1.1-11.6,3.3-11.6,3.3,5.8,3.3,11.6-1.1,11.5-3.3,11.5Z"/><path d="M84.5,90.5c2.8,0,5.6-1,8.6-.5-.7-1-1-6.7-1-12.1s.3-9.4.9-10.8c-3.9.9-6.3-.3-9.6-.3-5.3,0-9.8,3.2-9.8,11.7s3.6,12,11,12ZM85,90.1c-3.4.1-4.6-7.8-4.6-12.3s1.3-10.7,4.6-10.7c.3,3.6.4,7.6.4,11.5s-.1,7.9-.4,11.5Z"/><path d="M62,119.5c1.5-2.7,3.4-8.3,4.4-14,.5-3.1.8-6.1.6-8.8,3,.9,7.7.8,9.2,0-.1,2.4.3,5.2.9,8,1.2,5.8,3.9,12.2,5.7,14.8-2.3-.6-4.4-.6-6.7,0,.5-1.8.7-3.7.8-5.6,0-1.9,0-3.8,0-5.7h-4.3c-.4,1.8-.7,3.6-.8,5.5-.2,2-.1,4.1.2,5.8-3.7-.6-6.2-.6-9.8,0ZM72.5,107.9h4.2c-.6-4.8-1.1-8.2-1.1-10.4-.5,1.4-2.1,5.4-3.1,10.4Z"/><path d="M48.2,119.5c0-2.9-.6-7.4-1.8-12-1.1-3.9-2.7-7.9-4.8-11,.9.4,2.3.6,3.9.6s4.3-.3,5.9-.6c0,.8,0,1.6,0,2.4.1,5.7,2.9,16.7,4.7,19.6,1-3.5,2.2-12.2,2.3-17.7.1-1.5.3-3,.1-4.2.8.2,1.5.3,2.3.3s1.4,0,2.4-.3c-1.3,1.5-2.9,6.3-4.1,11.2-1.300,4.9-2.3,9.8-2.5,11.6-1.5-.3-2.9-.5-4.2-.5s-2.6.2-4.2.5Z"/><path d="M32.2,119.5c1.1-2,1.7-6.6,1.7-11.2s-.6-9.5-1.6-11.6c2.7.5,5.5.5,8.1,0-.7,1.9-1.1,6-1.1,10.3s.5,10.4,1.5,12.5c-2.6-.6-6-.5-8.7,0Z"/><path d="M19.8,120c-2.8,0-5.6-1-8.6-.5.7-1,1-6.7,1-12.1s-.3-9.4-.9-10.8c3.9.9,6.3-.3,9.6-.3,5.3,0,9.8,3.2,9.8,11.7s-3.600,12-11,12ZM19.3,119.6c3.4.1,4.6-7.8,4.6-12.3s-1.3-10.7-4.6-10.7c-.3,3.6-.4,7.6-.4,11.5s.1,7.9.4,11.5Z"/></g></svg></div>
+  <div class="titles">
+    <h1>Dolle Diva · Stuurdashboard <small>intern · dagelijks</small></h1>
+    <p>Wat moet ik nu bijsturen? · Bronnen: Ads, Meta, GA4, CRM, CMP</p>
+  </div>
+  <div class="ctrls">
+    <label class="ctrl"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V9h14v11Z"/></svg>
+      <select id="per" aria-label="Periode"><option value="7">Laatste 7 dagen</option><option value="14">Laatste 14 dagen</option><option value="30" selected>Laatste 30 dagen</option></select></label>
+    <label class="ctrl"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg>
+      <select id="chn" aria-label="Kanaal"><option value="all">Alle kanalen</option><option>Google Ads</option><option>Meta</option></select></label>
+  </div>
+</header>
+<nav class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" data-t="st">Bijsturen</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="sp">Google vs Meta</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="zt">Zoektermen</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="cr">Creatives</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="mg">Meetgezondheid</button>
+  <span class="tabsep">Setup</span>
+  <button class="tab" role="tab" aria-selected="false" data-t="ov">Overzicht</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="fl">Datastroom</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="br">Bronnen &amp; koppelingen</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="mp">Meetplan</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="ca">Consent &amp; AVG</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="mo">Alarmgrenzen</button>
+</nav>
+
+<main class="page"><div class="sheet">
+
+<!-- ================= BIJSTUREN ================= -->
+<section class="section on" id="st">
+  <div class="demo"><b>Voorbeelddata.</b> Gesimuleerd tot en met 9 nov 2026. Echte cijfers zodra Ads, Meta, GA4, het CRM en de CMP gekoppeld zijn.</div>
+  <div class="q"><b>Vraag:</b> wat moet ik nu bijsturen? · omzet en rendement staan bewust in het maandrapport, niet hier</div>
+  <div class="grid g-4" id="st-scores"></div>
+  <div class="grid g-21 mt">
+    <div class="comp">
+      <h3>Budget-pacing november</h3><div class="sub">cumulatieve besteding vs ideaal tempo (€ 1.500 per maand) · stippellijn = prognose bij huidig tempo</div>
+      <div class="legend"><span><i style="background:#891729"></i>Besteed</span><span><i class="dash"></i>Ideaal tempo</span><span><i style="background:#E0604C"></i>Prognose</span></div>
+      <div class="chart"><canvas id="c-pace" role="img" aria-label="Budget-pacing november"></canvas></div>
+    </div>
+    <div class="comp">
+      <h3>Pacing per kanaal</h3><div class="sub">deel van het maandbudget besteed · zwart streepje = waar je nu zou moeten zijn</div>
+      <div class="pace" id="pace-ch"></div>
+      <div id="pace-signal"></div>
+    </div>
+  </div>
+  <div class="comp mt">
+    <h3>Campagnetabel</h3><div class="sub">gekozen periode · klik op een kolom om te sorteren · signaal = afwijking van de kanaalnorm</div>
+    <div class="tblwrap"><table class="tbl num" id="tbl-camp"></table></div>
+  </div>
+</section>
+
+<!-- ================= GOOGLE VS META ================= -->
+<section class="section" id="sp">
+  <div class="vs-head" id="vs-head"></div>
+  <div class="comp mt">
+    <h3>Elk kanaal langs zijn eigen lat</h3>
+    <div class="sub">groen vlak = gezonde zone · bolletje = werkelijk in de gekozen periode · dit tabblad toont altijd beide kanalen · CPL-grenzen zijn een voorstel</div>
+    <div id="vs-kpis"></div>
+  </div>
+  <div class="grid g-2 mt">
+    <div class="comp">
+      <h3>CTR per week · Google Search</h3><div class="sub">laatste 8 weken · norm: hoger dan 5% (groen vlak)</div>
+      <div class="chart sm"><canvas id="c-ctr-g" role="img" aria-label="CTR per week Google Search"></canvas></div>
+      <div id="sig-g"></div>
+    </div>
+    <div class="comp">
+      <h3>CTR per week · Meta</h3><div class="sub">laatste 8 weken · norm: 0,8% tot 2% · een dalende lijn wijst op advertentiemoeheid</div>
+      <div class="chart sm"><canvas id="c-ctr-m" role="img" aria-label="CTR per week Meta"></canvas></div>
+      <div id="sig-m"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ZOEKTERMEN ================= -->
+<section class="section" id="zt">
+  <div class="demo"><b>Voorbeelddata.</b> Laatste 30 dagen. Na koppeling komt dit uit het zoektermenrapport van Google Ads.</div>
+  <div class="grid g-21">
+    <div class="comp">
+      <h3>Zoektermen</h3><div class="sub">waar onze advertenties op verschenen · ✱ = nieuw deze maand</div>
+      <div class="tblwrap"><table class="tbl num" id="tbl-terms"></table></div>
+    </div>
+    <div class="comp">
+      <h3>Voorgestelde uitsluitingen</h3><div class="sub">plakken in Google Ads → Zoekwoorden → Uitsluitingszoekwoorden</div>
+      <textarea class="neg" id="neg" readonly></textarea>
+      <button class="btn" id="copy-neg">Kopiëren</button> <span id="copied" style="font-size:12px;color:var(--good)"></span>
+      <h3 style="margin-top:16px">Voorgestelde nieuwe zoekwoorden</h3><div class="sub">zoektermen die aanvragen opleveren maar nog geen eigen zoekwoord hebben</div>
+      <ul id="add" style="padding-left:18px;font-size:13.5px;display:grid;gap:4px"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CREATIVES ================= -->
+<section class="section" id="cr">
+  <div class="demo"><b>Voorbeelddata.</b> Na koppeling komt dit uit Meta Ads Manager (per advertentie).</div>
+  <div class="comp">
+    <h3>Meta-advertenties</h3><div class="sub">gekozen periode · thumbstop = deel van de vertoningen dat 3 seconden blijft kijken (alleen video) · advies op basis van frequentie, CTR-daling en thumbstop</div>
+    <div class="tblwrap"><table class="tbl num" id="tbl-cre"></table></div>
+  </div>
+  <div class="grid g-2 mt">
+    <div class="comp">
+      <h3>Thumbstop per week · Reels</h3><div class="sub">laatste 8 weken · onder 25% = video pakt niet</div>
+      <div class="legend" id="lg-thumb"></div>
+      <div class="chart sm"><canvas id="c-thumb" role="img" aria-label="Thumbstop per week per Reel"></canvas></div>
+    </div>
+    <div class="comp">
+      <h3>Frequentie per advertentie</h3><div class="sub">hoe vaak dezelfde persoon de advertentie gemiddeld zag · boven 3 = moeheid-risico</div>
+      <div class="chart sm"><canvas id="c-freq" role="img" aria-label="Frequentie per advertentie"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MEETGEZONDHEID ================= -->
+<section class="section" id="mg">
+  <div class="demo"><b>Voorbeelddata.</b> Pas betrouwbaar na de fixes uit Setup → Overzicht (CMP, pixels via GTM, dubbele GTM weg).</div>
+  <div class="grid g-4" id="mg-scores"></div>
+  <div class="grid g-2 mt">
+    <div class="comp">
+      <h3>Leads per week: CRM vs GA4 vs platformen</h3><div class="sub">CRM = de waarheid · GA4 mist bezoekers zonder toestemming · platformen tellen soms dubbel of modelleren bij</div>
+      <div class="legend"><span><i style="background:#891729"></i>CRM (Zenchef/Sheet)</span><span><i style="background:#3E6FB0"></i>GA4</span><span><i style="background:#E0604C"></i>Google Ads + Meta</span></div>
+      <div class="chart"><canvas id="c-match" role="img" aria-label="Leads per week CRM, GA4 en platformen"></canvas></div>
+    </div>
+    <div class="comp">
+      <h3>Consent-ratio per dag</h3><div class="sub">deel bezoekers dat analytics- én advertentiecookies accepteert · alarm onder 55%</div>
+      <div class="chart"><canvas id="c-consent" role="img" aria-label="Consent-ratio per dag"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OVERZICHT ================= -->
+<section class="section" id="ov">
+  <h2 class="sec">Gezondheid per bron</h2>
+  <p class="intro">Voortgang komt uit de checklist (tab Consent &amp; AVG) en de status per bron (tab Bronnen). Vink af wat klaar is, dan kleurt dit overzicht mee. Wordt bewaard in deze browser.</p>
+  <div class="grid g-4" id="health"></div>
+
+  <div class="grid g-21 mt">
+    <div class="comp">
+      <h3>Bevindingen websitecheck · 10 nov 2026</h3>
+      <div class="sub">Eén bezoek aan dollediva.nl (homepage) in Chrome, zonder iets aan te klikken. Bevestigen met Tag Assistant en GTM-preview.</div>
+      <div id="findings"></div>
+    </div>
+    <div class="comp">
+      <h3>Eerst doen (in deze volgorde)</h3>
+      <div class="sub">zonder dit klopt geen enkel getal in het klantdashboard</div>
+      <ol style="padding-left:18px;display:grid;gap:8px;font-size:13.5px">
+        <li><b>Cookiebanner (CMP)</b> plaatsen met Google Consent Mode v2, via GTM.</li>
+        <li><b>Meta- en TikTok-pixel</b> uit de thema-HTML halen en via GTM laden, pas na toestemming.</li>
+        <li><b>Dubbele GTM-snippet</b> verwijderen (container laadt 2×).</li>
+        <li><b>GA4 + Ads-conversies</b> op de Zenchef-stappen zetten (dataLayer-events zijn er al).</li>
+        <li><b>Zenchef-boekingen terugkoppelen</b> naar Google Ads (offline/enhanced conversions) en Meta (CAPI), alleen met toestemming.</li>
+        <li><b>Looker Studio</b> koppelen: GA4, Google Ads, Meta (via connector) en de Zenchef-sheet.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DATASTROOM ================= -->
+<section class="section" id="fl">
+  <h2 class="sec">Van klik tot boeking: hoe de data stroomt</h2>
+  <p class="intro">Koraal = bestaat al op de site. Bordeaux = consent-laag (moet ertussen). Gestippeld = nog bouwen of optioneel.</p>
+  <div class="flow">
+    <div class="col"><h5>1 · Bezoeker</h5>
+      <div class="node"><b>Google Search</b><span>gclid / gbraid</span><i class="arrow">→</i></div>
+      <div class="node"><b>Meta (IG/FB)</b><span>fbclid</span><i class="arrow">→</i></div>
+      <div class="node"><b>TikTok</b><span>ttclid</span><i class="arrow">→</i></div>
+      <div class="node"><b>Organisch / direct</b><span>SEO, Maps, social bio</span><i class="arrow">→</i></div>
+    </div>
+    <div class="col"><h5>2 · Website</h5>
+      <div class="node k"><b>dollediva.nl</b><span>WordPress + Elementor</span><i class="arrow">→</i></div>
+      <div class="node k"><b>Zenchef-widget</b><span>iframe, pusht <code>zcf-bookings-*</code> naar dataLayer</span><i class="arrow">→</i></div>
+      <div class="node c"><b>Cookiebanner (CMP)</b><span>Consent Mode v2: ad_storage, analytics_storage, ad_user_data, ad_personalization</span><i class="arrow">→</i></div>
+    </div>
+    <div class="col"><h5>3 · Tagging</h5>
+      <div class="node k"><b>GTM web</b><span>GTM-NNZ7Q6P (nu 2× geladen)</span><i class="arrow">→</i></div>
+      <div class="node o"><b>Server-side GTM</b><span>optioneel: first-party, CAPI, minder adblock-verlies</span><i class="arrow">→</i></div>
+      <div class="node o"><b>Zenchef → Sheet</b><span>export / webhook: boekingen + status</span><i class="arrow">→</i></div>
+    </div>
+    <div class="col"><h5>4 · Platformen</h5>
+      <div class="node"><b>GA4</b><span>events + conversies</span><i class="arrow">→</i></div>
+      <div class="node"><b>Google Ads</b><span>conversies, enhanced + offline</span><i class="arrow">→</i></div>
+      <div class="node k"><b>Meta Pixel + CAPI</b><span>pixel staat nu hard in HTML</span><i class="arrow">→</i></div>
+      <div class="node k"><b>TikTok Pixel</b><span>staat nu hard in HTML</span><i class="arrow">→</i></div>
+    </div>
+    <div class="col"><h5>5 · Rapportage</h5>
+      <div class="node"><b>Looker Studio</b><span>klantrapport + dit dashboard</span></div>
+      <div class="node o"><b>BigQuery</b><span>optioneel: GA4-export, historie &gt; 14 mnd</span></div>
+      <div class="node o"><b>Google Sheets</b><span>Zenchef-boekingen, budgetten, doelen</span></div>
+    </div>
+  </div>
+  <div class="comp mt">
+    <h3>Het lastige stuk: van “aanvraag” naar “echte boeking”</h3>
+    <p style="font-size:13.5px;color:var(--ink-2);margin-top:4px">De Zenchef-widget draait in een iframe, dus het websitebezoek en de boeking zitten niet vanzelf aan elkaar. Om op <b>kosten per boeking</b> te sturen (en niet alleen op kosten per aanvraag), moet de echte boekingsstatus uit Zenchef terug naar de advertentieplatformen:</p>
+    <ul style="font-size:13.5px;padding-left:18px;margin-top:8px;display:grid;gap:4px">
+      <li><b>Google Ads:</b> enhanced conversions for leads (gehasht e-mailadres bij aanvraag), daarna boeking als offline conversie uploaden. Vereist <code>ad_user_data</code> = granted.</li>
+      <li><b>Meta:</b> Conversions API met dezelfde <code>event_id</code> als de pixel (deduplicatie). Boeking als offline event <code>Purchase</code> of <code>Schedule</code>.</li>
+      <li><b>Gekwalificeerd:</b> handmatige status in Zenchef of in de sheet (bijv. groep ≥ 8 personen, datum binnen 90 dagen). Dit moet de klant samen met ons afspreken.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= BRONNEN ================= -->
+<section class="section" id="br">
+  <h2 class="sec">Databronnen en Looker Studio-koppelingen</h2>
+  <p class="intro">Alles wat nodig is om te kunnen sturen. Zet de status bij als iets gekoppeld is. Wordt bewaard in deze browser en telt mee in het overzicht.</p>
+  <div class="tblwrap"><table class="tbl" id="tbl-src"></table></div>
+</section>
+
+<!-- ================= MEETPLAN ================= -->
+<section class="section" id="mp">
+  <h2 class="sec">Meetplan: welke events, waarheen</h2>
+  <p class="intro">Eén event-naam in de dataLayer, vanuit GTM naar elk platform vertaald. Hoofdconversie voor bieden = <b>boeking</b> (offline), secundair = <b>aanvraag</b>.</p>
+  <div class="tblwrap"><table class="tbl" id="tbl-plan"></table></div>
+</section>
+
+<!-- ================= CONSENT & AVG ================= -->
+<section class="section" id="ca">
+  <h2 class="sec">Consent &amp; AVG-checklist</h2>
+  <p class="intro">Gebaseerd op AVG, Telecommunicatiewet (cookies) en de richtlijnen van de Autoriteit Persoonsgegevens. Dit is een werklijst, geen juridisch advies. Laat de privacyverklaring en verwerkersovereenkomsten checken door iemand met juridische kennis.</p>
+  <div class="progress"><span id="ck-count"></span><div class="bar"><b id="ck-bar"></b></div></div>
+  <div class="grid g-2" id="checklists"></div>
+</section>
+
+<!-- ================= MONITORING ================= -->
+<section class="section" id="mo">
+  <h2 class="sec">Monitoring en alarmgrenzen</h2>
+  <p class="intro">Wekelijks checken (maandag), of automatisch via Looker Studio-e-mailschema's of Google Ads-regels.</p>
+  <div class="tblwrap"><table class="tbl" id="tbl-mon"></table></div>
+  </section>
+
+</div></main>
+<footer>Intern document, niet delen met de klant. Bevindingen zijn een momentopname van 10 nov 2026; herhaal de check na elke GTM-publicatie.</footer>
+
+<script>
+(() => {
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('ddi2-'+k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem('ddi2-'+k, JSON.stringify(v)); } catch(e){} }
+};
+
+/* ---------- real findings, 10 nov 2026 ---------- */
+const FINDINGS = [
+  ['bad','Kritiek','Geen cookiebanner zichtbaar','Na 5 seconden op de homepage verscheen geen toestemmingsvenster, en er laadt geen bekend CMP-script.','Plaats een CMP (bijv. Cookiebot, CookieYes, Complianz) met Consent Mode v2 en een even makkelijke “weigeren”-knop.'],
+  ['bad','Kritiek','Meta Pixel vuurt zonder toestemming','fbevents.js staat hard in de thema-HTML en stuurt direct een PageView.','Uit de HTML halen, via GTM laden met trigger “consent ad_storage = granted”.'],
+  ['bad','Kritiek','TikTok Pixel vuurt zonder toestemming','events.js staat hard in de HTML en roept direct ttq.page() aan.','Zelfde aanpak als Meta, of uitzetten als TikTok niet actief geadverteerd wordt.'],
+  ['warn','Hoog','Geen Consent Mode-signaal','Er staat geen consent-default in de dataLayer, dus Google-tags weten niet wat mag. Zonder Consent Mode v2 werken remarketing en conversiemodellering in de EER beperkt.','Default “denied” vóór GTM laden, en via de CMP updaten.'],
+  ['warn','Hoog','GTM-container laadt twee keer','Er staan twee gtm.js-events in de dataLayer. Dat geeft risico op dubbele paginaweergaven en conversies.','Eén van de twee snippets verwijderen (thema óf plugin).'],
+  ['info','Kans','Zenchef stuurt events naar de dataLayer','Gezien: <code>zcf-bookings-navigated</code> met de pagina van de widgetstap. Daarmee is de reserveringsfunnel stap voor stap te meten.','In GTM-preview alle zcf-events loggen; de stap “bevestiging” wordt de aanvraag-conversie.'],
+  ['todo','Controleren','GA4 niet direct zichtbaar','Geen losse gtag in de HTML. GA4 zit waarschijnlijk in GTM, maar dat is niet bevestigd.','In GTM: GA4-config-tag, measurement-ID, en of deze op consent wacht.'],
+];
+
+/* ---------- sources ---------- */
+const SOURCES = [
+  ['ga4','GA4','Sessies, kanalen, landingspagina’s, events, funnel van widgetstappen','Native: Google Analytics','dagelijks (± 24-48 u)','Beheerder op property'],
+  ['gtm','Google Tag Manager','Welke tags/triggers draaien, consent-instellingen, versiehistorie','Geen connector; handmatig of via GTM API → Sheet','per publicatie','Publiceren op GTM-NNZ7Q6P'],
+  ['ads','Google Ads','Kosten, kliks, vertoningen, zoektermen, conversies (incl. offline)','Native: Google Ads','dagelijks','Standaard toegang via MCC'],
+  ['meta','Meta Ads','Kosten, bereik, kliks, leads, Pixel/CAPI-events, Event Match Quality','Partnerconnector (bijv. Supermetrics, Windsor.ai, Porter) of export naar Sheets/BigQuery','dagelijks','Business Manager: partner op advertentieaccount + pixel'],
+  ['tiktok','TikTok Ads','Alleen als er geadverteerd wordt: kosten, kliks, events','Partnerconnector of export','dagelijks','TikTok Business Center'],
+  ['zen','Zenchef','Aanvragen, boekingen, status (bevestigd/geannuleerd/no-show), groepsgrootte, type','Export of webhook → Google Sheets (of BigQuery)','dagelijks of realtime','Admin-account Zenchef / API-key via de klant'],
+  ['cmp','Cookiebanner (CMP)','Consent-acceptatie per categorie, per dag, per apparaat','CMP-export → Sheets, of GA4-dimensie consent','dagelijks','Beheer in CMP-account'],
+  ['gsc','Search Console','Organische zoekwoorden, vertoningen, posities (merk vs niet-merk)','Native: Search Console','dagelijks (± 2 d)','Eigenaar of volledige gebruiker'],
+  ['sheet','Doelen & budget (Sheet)','Maandbudget per kanaal, doelen (€ 125/boeking), afspraken “gekwalificeerd”','Native: Google Sheets','handmatig','Wij'],
+];
+const SRC_STATUS = [['todo','Nog niet gestart'],['warn','Bezig'],['ok','Gekoppeld'],['bad','Probleem']];
+const srcState = store.get('src', {ga4:'todo', gtm:'todo', ads:'todo', meta:'bad', tiktok:'bad', zen:'todo', cmp:'bad', gsc:'todo', sheet:'todo'});
+
+/* ---------- measurement plan ---------- */
+const PLAN = [
+  ['page_view','Elke pagina','page_view','–','PageView','page()','analytics / ad','page_location, page_referrer'],
+  ['view_reservation','Widget geopend (zcf-event)','view_reservation','–','ViewContent','ViewContent','analytics / ad','widget_step'],
+  ['begin_reservation','Gasten + datum gekozen','begin_reservation','–','InitiateCheckout','InitiateCheckout','analytics / ad','party_size, date, type'],
+  ['generate_lead','Aanvraag bevestigd in widget','generate_lead ★','Aanvraag (secundair)','Lead','SubmitForm','analytics / ad / ad_user_data','event_id, party_size, type, value'],
+  ['group_request','Formulier groepen/events verstuurd','generate_lead (type=group)','Aanvraag groep','Lead','SubmitForm','analytics / ad / ad_user_data','event_id, party_size, occasion'],
+  ['click_contact','Klik op WhatsApp / telefoon / mail','click_contact','Contact (secundair)','Contact','Contact','analytics / ad','method'],
+  ['qualified_lead','Status in Zenchef/Sheet = gekwalificeerd','qualified_lead (MP)','Gekwalificeerd (offline)','QualifiedLead (CAPI)','–','ad_user_data','gclid/hashed email, event_id'],
+  ['booking_confirmed','Status in Zenchef = bevestigd/aanwezig','booking (MP)','Boeking ★ (offline, voor bieden)','Purchase / Schedule (CAPI)','CompletePayment (Events API)','ad_user_data','value (geschatte omzet), event_id'],
+];
+
+/* ---------- checklist ---------- */
+const CHECKS = {
+  'Cookiebanner & Consent Mode v2': [
+    ['c1','CMP gekozen en geplaatst via GTM','Bijv. Cookiebot, CookieYes of Complianz (Google-gecertificeerd)','Consent'],
+    ['c2','“Weigeren” even zichtbaar en makkelijk als “Accepteren”','AP: geen verstopte weigerknop, geen vooraf aangevinkte vakjes','AP'],
+    ['c3','Geen marketing- of analysecookies vóór toestemming','Meta, TikTok en GA4 pas na consent (behalve geanonimiseerde basis)','Consent'],
+    ['c4','Consent Mode v2 default = denied, vóór GTM','ad_storage, analytics_storage, ad_user_data, ad_personalization','Google'],
+    ['c5','Consent wordt bijgewerkt na keuze (update-commando)','Controleren in Tag Assistant: “Consent” tab','Google'],
+    ['c6','Toestemming intrekken kan altijd (vaste link/knop)','bijv. “Cookie-instellingen” in de footer','AP'],
+    ['c7','Consent-logs worden bewaard','Bewijs van toestemming (CMP doet dit meestal)','AVG'],
+  ],
+  'Tags & platformen': [
+    ['t1','Hardcoded Meta- en TikTok-pixel uit thema verwijderd','Nu nog in de HTML gevonden (10 nov)','GTM'],
+    ['t2','Dubbele GTM-snippet verwijderd','Container laadt nu 2×','GTM'],
+    ['t3','GA4: Google Signals bewust aan/uit, dataretentie ingesteld','2 of 14 maanden; langer = BigQuery-export','GA4'],
+    ['t4','GA4: interne verkeer en spam uitgesloten','IP-filter voor het team, ongewenste verwijzers','GA4'],
+    ['t5','Google Ads: auto-tagging aan, conversies gekoppeld','Hoofdconversie = boeking (offline), aanvraag = secundair','Ads'],
+    ['t6','Enhanced conversions for leads aan','Alleen met ad_user_data = granted','Ads'],
+    ['t7','Meta: CAPI met deduplicatie (event_id)','Event Match Quality ≥ 6 nastreven','Meta'],
+    ['t8','Meta: domein geverifieerd, events geprioriteerd','Business Manager → Merkveiligheid → Domeinen','Meta'],
+  ],
+  'AVG & documenten': [
+    ['a1','Privacyverklaring noemt GA4, Google Ads, Meta, TikTok, Zenchef','Doel, grondslag, bewaartermijn, doorgifte buiten EU','AVG'],
+    ['a2','Cookieverklaring met lijst van cookies','CMP genereert die meestal automatisch','AP'],
+    ['a3','Verwerkersovereenkomst met Zenchef','Zenchef verwerkt gastgegevens namens Dolle Diva','AVG'],
+    ['a4','Verwerkersovereenkomst met ons (bureau)','Wij hebben toegang tot accounts en data','AVG'],
+    ['a5','Google Ads Data Processing Terms geaccepteerd','Google Ads → Beheerder → Instellingen','AVG'],
+    ['a6','Meta-voorwaarden (o.a. gezamenlijke verwerking pixel)','Bij pixelgebruik is Dolle Diva mede-verantwoordelijk','AVG'],
+    ['a7','Doorgifte VS afgedekt (EU-US Data Privacy Framework)','Google, Meta: gecertificeerd. TikTok: aparte afweging','AVG'],
+    ['a8','Register van verwerkingsactiviteiten bijgewerkt','Marketing, reserveringen, nieuwsbrief','AVG'],
+    ['a9','Proces voor inzage- en verwijderverzoeken','Wie haalt gegevens uit Zenchef, Ads en Meta-lijsten?','AVG'],
+    ['a10','Alleen gehashte gegevens naar Ads/Meta, minimaal nodig','Geen namen, geen telefoonnummers zonder noodzaak','AVG'],
+  ],
+};
+const ckState = store.get('ck', {});
+
+/* ---------- monitoring ---------- */
+const MON = [
+  ['Kosten per boeking','> € 150 over 14 dagen','Ads + Meta + Zenchef','Budget naar beste campagne, zoektermen/creatives checken'],
+  ['Boekingen Zenchef vs platformen','verschil > 25% per week','Zenchef-sheet vs Ads/Meta','Tracking testen in GTM-preview; offline upload checken'],
+  ['Consent-acceptatie','< 55% per dag','CMP / GA4','Banner-tekst en opmaak bekijken (eerlijk, niet misleidend)'],
+  ['Aanvragen per dag','0 aanvragen op 2 dagen achter elkaar','GA4 generate_lead','Widget en tag kapot? Direct testen'],
+  ['Meta Event Match Quality','< 6,0','Meta Events Manager','Meer (gehashte) klantgegevens via CAPI meesturen, mits consent'],
+  ['Google Ads-conversiestatus','“Geen recente conversies” / “Onjuist ingesteld”','Google Ads → Doelen','Tag of offline import repareren'],
+  ['GTM-publicatie','elke nieuwe versie','GTM versiehistorie','Websitecheck van dit dashboard opnieuw doen'],
+  ['Budgetbesteding','> 110% of < 80% van planning halverwege de maand','Ads + Meta','Dagbudgetten bijstellen'],
+];
+
+/* ---------- render ---------- */
+const chip = (k, l) => `<span class="chip ${k}">${l}</span>`;
+function renderFindings(){
+  document.getElementById('findings').innerHTML = FINDINGS.map(([k,l,t,p,f]) =>
+    `<div class="find"><div>${chip(k,l)}</div><div><h4>${t}</h4><p>${p}</p><p class="fix"><b>Oplossing:</b> ${f}</p></div></div>`).join('');
+}
+function renderSources(){
+  document.getElementById('tbl-src').innerHTML = `<thead><tr><th>Bron</th><th>Wat levert het</th><th>Koppeling in Looker Studio</th><th>Verversing</th><th>Toegang nodig</th><th>Status</th></tr></thead><tbody>` +
+    SOURCES.map(([id,n,w,c,r,t]) => `<tr><td><b>${n}</b></td><td>${w}</td><td>${c}</td><td>${r}</td><td>${t}</td><td><select data-id="${id}" aria-label="Status ${n}">${SRC_STATUS.map(([k,l]) => `<option value="${k}"${srcState[id]===k?' selected':''}>${l}</option>`).join('')}</select></td></tr>`).join('') + '</tbody>';
+  document.querySelectorAll('#tbl-src select').forEach(s => s.onchange = () => { srcState[s.dataset.id] = s.value; store.set('src', srcState); renderHealth(); });
+}
+function renderPlan(){
+  const cell = v => v === '–' ? '<td class="c no">–</td>' : `<td><code>${v}</code></td>`;
+  document.getElementById('tbl-plan').innerHTML = `<thead><tr><th>dataLayer-event</th><th>Wanneer</th><th>GA4</th><th>Google Ads</th><th>Meta</th><th>TikTok</th><th>Consent nodig</th><th>Parameters</th></tr></thead><tbody>` +
+    PLAN.map(([e,w,g,a,m,t,c,p]) => `<tr><td><code>${e}</code></td><td>${w}</td>${cell(g)}<td>${a}</td>${cell(m)}${cell(t)}<td>${c}</td><td class="mono">${p}</td></tr>`).join('') + '</tbody>';
+}
+function renderChecks(){
+  document.getElementById('checklists').innerHTML = Object.entries(CHECKS).map(([g, items]) =>
+    `<div class="comp"><h3>${g}</h3><div class="sub">${items.length} punten</div><div class="ck">${items.map(([id,t,s,tag]) =>
+      `<label><input type="checkbox" data-id="${id}"${ckState[id]?' checked':''}><span class="t">${t}<small>${s}</small></span><span class="tag">${tag}</span></label>`).join('')}</div></div>`).join('');
+  document.querySelectorAll('#checklists input').forEach(i => i.onchange = () => { ckState[i.dataset.id] = i.checked; store.set('ck', ckState); renderProgress(); renderHealth(); });
+  renderProgress();
+}
+function renderProgress(){
+  const all = Object.values(CHECKS).flat(), done = all.filter(([id]) => ckState[id]).length;
+  document.getElementById('ck-count').textContent = `${done} van ${all.length} afgerond`;
+  document.getElementById('ck-bar').style.width = (done/all.length*100) + '%';
+}
+function renderHealth(){
+  const pct = ids => { const d = ids.filter(i => ckState[i]).length; return Math.round(d/ids.length*100); };
+  const st = k => SRC_STATUS.find(s => s[0]===srcState[k]);
+  const tiles = [
+    ['Consent (CMP)', 'nog geen banner gevonden', st('cmp'), pct(['c1','c2','c3','c4','c5','c6','c7'])],
+    ['Google Tag Manager', 'GTM-NNZ7Q6P', st('gtm'), pct(['t1','t2'])],
+    ['GA4', 'via GTM (te bevestigen)', st('ga4'), pct(['t3','t4'])],
+    ['Google Ads', 'offline + enhanced conversions', st('ads'), pct(['t5','t6'])],
+    ['Meta', 'pixel hardcoded, geen CAPI', st('meta'), pct(['t7','t8'])],
+    ['TikTok', 'pixel hardcoded', st('tiktok'), pct(['t1'])],
+    ['Zenchef', 'boekingen = de waarheid', st('zen'), srcState.zen==='ok'?100:srcState.zen==='warn'?50:0],
+    ['AVG & documenten', 'privacy, verwerkers, register', null, pct(['a1','a2','a3','a4','a5','a6','a7','a8','a9','a10'])],
+  ];
+  document.getElementById('health').innerHTML = tiles.map(([n, id, s, p]) => {
+    const status = s || (p===100 ? ['ok','Op orde'] : p>0 ? ['warn','Bezig'] : ['todo','Nog niet gestart']);
+    return `<div class="comp src"><div class="top"><span class="nm">${n}</span>${chip(status[0], status[1])}</div><span class="id">${id}</span><div class="bar"><b style="width:${p}%"></b></div><span class="pct">${p}% van de checklist afgevinkt</span></div>`;
+  }).join('');
+}
+function renderMon(){
+  document.getElementById('tbl-mon').innerHTML = `<thead><tr><th>Signaal</th><th>Alarm bij</th><th>Bron</th><th>Actie</th></tr></thead><tbody>` +
+    MON.map(([a,b,c,d]) => `<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td><td>${d}</td></tr>`).join('') + '</tbody>';
+}
+let chartsMade = false;
+function renderCharts(){
+  if (chartsMade || typeof Chart === 'undefined') return; chartsMade = true;
+  Chart.defaults.font.family = 'Roboto, system-ui, sans-serif'; Chart.defaults.color = '#5F6368';
+  Chart.defaults.plugins.legend.display = false; Chart.defaults.maintainAspectRatio = false;
+  Chart.defaults.plugins.tooltip.backgroundColor = '#202124';
+  let s = 7; const rnd = () => (s = (s*16807) % 2147483647) / 2147483647;
+  const days = Array.from({length:28}, (_,i) => { const d = new Date(2026,9,4+i); return d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'}); });
+  const cons = days.map((_,i) => Math.round((58 + 8*Math.sin(i/4) + 6*rnd() - (i===17?14:0))*10)/10);
+  const grid = {color:'#EEF0F2', drawTicks:false};
+  new Chart(document.getElementById('c-consent'), {type:'line', data:{labels:days, datasets:[{data:cons, borderColor:'#891729', borderWidth:2, pointRadius:cons.map(v=>v<55?5:0), pointBackgroundColor:'#C5221F', pointBorderColor:'#fff', pointBorderWidth:2, pointHoverRadius:5, tension:.3}]},
+    options:{interaction:{mode:'index',intersect:false}, scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:7}}, y:{min:30, max:90, grid, border:{display:false}, ticks:{callback:v=>v+'%'}}},
+      plugins:{tooltip:{callbacks:{label:c=>` ${c.parsed.y.toLocaleString('nl-NL')}% accepteert${c.parsed.y<55?' (onder alarmgrens)':''}`}}}},
+    plugins:[{id:'th', afterDatasetsDraw(ch){ const {ctx, chartArea:a, scales:{y}} = ch, py = y.getPixelForValue(55); ctx.save(); ctx.setLineDash([4,4]); ctx.strokeStyle='#C5221F'; ctx.beginPath(); ctx.moveTo(a.left,py); ctx.lineTo(a.right,py); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='#C5221F'; ctx.font='500 11px Roboto'; ctx.fillText('alarm 55%', a.left+4, py-5); ctx.restore(); }}]});
+  const wk = ['wk 41','wk 42','wk 43','wk 44'], z = [3,2,4,3], p = [3,4,4,2];
+  new Chart(document.getElementById('c-match'), {type:'bar', data:{labels:wk, datasets:[
+      {label:'Zenchef', data:z, backgroundColor:'#891729', borderRadius:4, borderSkipped:'bottom', maxBarThickness:30},
+      {label:'Google Ads + Meta', data:p, backgroundColor:'#E0604C', borderRadius:4, borderSkipped:'bottom', maxBarThickness:30}]},
+    options:{interaction:{mode:'index',intersect:false}, datasets:{bar:{categoryPercentage:.6, barPercentage:.9}}, scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid, border:{display:false}, ticks:{precision:0}}},
+      plugins:{tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}`, footer:items => { const d = items[1] && items[0] ? items[1].parsed.y - items[0].parsed.y : 0; return d ? `verschil: ${d>0?'+':''}${d}` : 'gelijk'; }}}}}});
+}
+
+renderFindings(); renderSources(); renderPlan(); renderChecks(); renderHealth(); renderMon();
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x===b));
+  document.querySelectorAll('.section').forEach(x => x.classList.toggle('on', x.id===b.dataset.t));
+  store.set('tab', b.dataset.t);
+});
+const t = store.get('tab', null); if (t) document.querySelector(`.tab[data-t="${t}"]`)?.click();
+})();
+</script>
+<script>
+/* Dolle Diva — shared DEMO data for klant v2 + intern v2.
+   Simulated, deterministic. Replace with real GA4 / Google Ads / Meta / CRM data once linked.
+   Range: 1 May 2026 – 9 Nov 2026 (data up to "yesterday"). */
+const DD = (() => {
+  let seed = 20261109;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+
+  const TYPES = ['Bedrijfsfeest','Zakelijk diner','Kerstborrel','Verjaardag','Vriendinnenavond','Babyshower','Dinnershow'];
+  const SEG = [0,0,0,1,1,1,1]; // 0 = zakelijk, 1 = privé
+  const AVG_BOOKING = 500;      // aanname: gemiddelde omzet per boeking
+  const PLAN = {cost:1500, aanv:57, kwal:34, boek:12}; // per maand
+  const NORM = {
+    'Google Ads': {ctr:{min:.05, max:null, scale:.15}, cr:{min:.04}, cpl:{max:40}},
+    'Meta':       {ctr:{min:.008, max:.02, scale:.04}, cr:{min:.015}, cpl:{max:25}},
+  };
+
+  // units = Google campaigns, and Meta ads (an ad belongs to a campaign)
+  const U = [
+    {ch:'Google Ads', camp:'Search · Bedrijfsfeest Amersfoort', ad:null, clicks:9,   cpc:1.85, ctr:.068, pA:.049, z:.85},
+    {ch:'Google Ads', camp:'Search · Groepsdiner zakelijk',     ad:null, clicks:8,   cpc:1.60, ctr:.061, pA:.046, z:.70},
+    {ch:'Google Ads', camp:'Search · Brand Dolle Diva',         ad:null, clicks:7,   cpc:.45,  ctr:.140, pA:.060, z:.35},
+    {ch:'Meta', camp:'Meta · Binnenkort jarig',      ad:'Reel · Taart met sterretjes',             fmt:'Reel',      clicks:4.5, cpc:.75, ctr:.014, pA:.028, z:.05, thumb:.34},
+    {ch:'Meta', camp:'Meta · Binnenkort jarig',      ad:'Foto · Champagnetoren',                   fmt:'Foto',      clicks:3.5, cpc:.80, ctr:.012, pA:.028, z:.05},
+    {ch:'Meta', camp:'Meta · Feestjes Reels',        ad:'Reel · Polonaise onder de kroonluchters', fmt:'Reel',      clicks:6,   cpc:.62, ctr:.018, pA:.021, z:.08, thumb:.38, fatigue:'2026-09-28'},
+    {ch:'Meta', camp:'Meta · Feestjes Reels',        ad:'Reel · Dinnershow highlights',            fmt:'Reel',      clicks:3,   cpc:.70, ctr:.015, pA:.021, z:.08, thumb:.29, start:'2026-10-20'},
+    {ch:'Meta', camp:'Meta · Retargeting bezoekers', ad:'Carrousel · Menu & cocktails',            fmt:'Carrousel', clicks:4,   cpc:1.10, ctr:.019, pA:.042, z:.20},
+  ];
+  const MONTHF = {4:.85, 5:.9, 6:.8, 7:.85, 8:1.0, 9:1.05, 10:1.08}; // May..Nov (0-based month)
+  const DOWF = [0.9,0.8,0.85,0.95,1.05,1.25,1.2];
+  const START = new Date(2026, 4, 1), END = new Date(2026, 10, 9);
+  const day = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+  const DAYS = Math.round((END - START) / 864e5) + 1;
+
+  const rows = [];
+  for (let d = 0; d < DAYS; d++){
+    const date = new Date(START); date.setDate(START.getDate() + d);
+    const mo = date.getMonth(), f = DOWF[date.getDay()] * MONTHF[mo];
+    const xmas = mo >= 8 ? (mo >= 9 ? 1.35 : 1.15) : 1;           // more business requests towards December
+    const consent = Math.min(.8, Math.max(.4, .6 + .06*Math.sin(d/9) + .05*(rnd()-.5)));
+    const gclidP = .45 + .25 * d / DAYS;                            // gclid capture improves over time
+    U.forEach((u, ui) => {
+      if (u.start && date < day(u.start)) return;
+      const live = Math.floor((date - (u.start ? day(u.start) : START)) / 864e5);
+      const fat = u.fatigue && date >= day(u.fatigue) ? Math.max(.5, 1 - .012 * (date - day(u.fatigue)) / 864e5) : 1;
+      const clicks = Math.max(0, Math.round(u.clicks * f * (0.75 + 0.5*rnd())));
+      const cost = clicks * u.cpc * (0.88 + 0.24*rnd());
+      const impr = Math.round(clicks / (u.ctr * fat * (0.85 + 0.3*rnd()))) || Math.round(u.clicks / u.ctr * .5);
+      const r = {d, date, ui, ch:u.ch, camp:u.camp, ad:u.ad, clicks, cost, impr, live, fat,
+                 a:[0,0], k:[0,0], b:[0,0], t:Array(TYPES.length).fill(0), tb:Array(TYPES.length).fill(0), gclid:0, consent};
+      const zP = Math.min(.95, u.z * xmas);
+      for (let i = 0; i < clicks; i++) if (rnd() < u.pA * (u.ch === 'Meta' ? fat**.5 : 1)) {
+        const seg = rnd() < zP ? 0 : 1;
+        let ty; if (seg === 0) { const w = mo >= 8 ? [45,35,20] : [55,45,0]; ty = pick(w); }
+                else { ty = 3 + pick(u.camp.includes('Reels') ? [20,15,10,55] : u.camp.includes('jarig') ? [60,25,8,7] : [35,30,15,20]); }
+        r.a[seg]++; r.t[ty]++;
+        if (u.ch === 'Google Ads' && rnd() < gclidP) r.gclid++;
+        if (rnd() < (seg ? .52 : .70)) { r.k[seg]++; if (rnd() < (seg ? .31 : .40)) { r.b[seg]++; r.tb[ty]++; } }
+      }
+      rows.push(r);
+    });
+  }
+  function pick(w){ const s = w.reduce((a,b)=>a+b,0); let x = rnd()*s; for (let i = 0; i < w.length; i++){ x -= w[i]; if (x <= 0) return i; } return 0; }
+
+  const sum = (arr, fn) => arr.reduce((a, r) => a + fn(r), 0);
+  const agg = arr => {
+    const o = {clicks:sum(arr,r=>r.clicks), cost:sum(arr,r=>r.cost), impr:sum(arr,r=>r.impr),
+               aZ:sum(arr,r=>r.a[0]), aP:sum(arr,r=>r.a[1]), kZ:sum(arr,r=>r.k[0]), kP:sum(arr,r=>r.k[1]), bZ:sum(arr,r=>r.b[0]), bP:sum(arr,r=>r.b[1]),
+               gclid:sum(arr,r=>r.gclid), gLeads:sum(arr.filter(r=>r.ch==='Google Ads'), r=>r.a[0]+r.a[1])};
+    o.aanv = o.aZ + o.aP; o.kwal = o.kZ + o.kP; o.boek = o.bZ + o.bP; o.omzet = o.boek * AVG_BOOKING;
+    return o;
+  };
+  return {rows, U, TYPES, SEG, AVG_BOOKING, PLAN, NORM, START, END, DAYS, agg, sum, rnd};
+})();
+
+</script>
+<script>
+(() => {
+const {rows, U, PLAN, NORM, agg, sum, DAYS} = DD;
+const nf = new Intl.NumberFormat('nl-NL');
+const ef = new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const ef2 = new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
+const p1 = v => (v*100).toLocaleString('nl-NL',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const COL = {'Google Ads':'#E0604C','Meta':'#A8233A'};
+const BUDGET = {'Google Ads':975, 'Meta':525}; // voorstel: 65/35 van € 1.500
+const LAST = DAYS - 1;
+const chip = (k, l) => `<span class="chip ${k}">${l}</span>`;
+const st = (ok, warn, l) => ok ? chip('ok', l?.[0] || 'Op koers') : warn ? chip('warn', l?.[1] || 'Let op') : chip('bad', l?.[2] || 'Actie nodig');
+function delta(cur, prev, lowerBetter){
+  if (!prev || !isFinite(prev) || !isFinite(cur)) return '<span class="delta flat">n.v.t.</span>';
+  const c = (cur - prev) / prev, good = lowerBetter ? c < 0 : c > 0;
+  if (Math.abs(c) < .005) return '<span class="delta flat">gelijk</span>';
+  return `<span class="delta ${good?'up':'down'}">${c>0?'▲':'▼'} ${Math.abs(Math.round(c*100))}%</span>`;
+}
+const per = document.getElementById('per'), chn = document.getElementById('chn');
+function win(){
+  const n = +per.value, ch = chn.value, a = LAST - n + 1, inCh = r => ch === 'all' || r.ch === ch;
+  return {n, ch, a, cur:rows.filter(r => r.d >= a && inCh(r)), prev:rows.filter(r => r.d >= a-n && r.d < a && inCh(r)),
+          both:rows.filter(r => r.d >= a), bothPrev:rows.filter(r => r.d >= a-n && r.d < a)};
+}
+// 8 weekly chunks ending yesterday
+const chunks = Array.from({length:8}, (_, i) => { const a = LAST - 55 + 7*i; return {a, b:a+6, label:rows.find(r=>r.d===a).date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})}; });
+
+Chart.defaults.font.family = 'Roboto, system-ui, sans-serif'; Chart.defaults.font.size = 12; Chart.defaults.color = '#5F6368';
+Chart.defaults.plugins.legend.display = false; Chart.defaults.maintainAspectRatio = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#202124'; Chart.defaults.plugins.tooltip.padding = 10;
+const grid = {color:'#EEF0F2', drawTicks:false};
+const charts = {};
+const mk = (id, cfg) => { charts[id]?.destroy(); charts[id] = new Chart(document.getElementById(id), cfg); };
+const hline = (v, color, label) => ({id:'h'+v, afterDatasetsDraw(c){ const {ctx, chartArea:a, scales:{y}} = c, py = y.getPixelForValue(v); ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); ctx.setLineDash([]); if (label){ ctx.fillStyle = color; ctx.font = '500 11px Roboto'; ctx.fillText(label, a.left + 4, py - 5); } ctx.restore(); }});
+
+/* ================= BIJSTUREN ================= */
+function renderSteer(){
+  const w = win(), c = agg(w.cur), p = agg(w.prev);
+  // pacing november
+  const nov = rows.filter(r => r.date.getMonth() === 10), days = Math.max(...nov.map(r => r.date.getDate()));
+  const spent = sum(nov, r => r.cost), ideal = PLAN.cost * days / 30, pace = spent / ideal, fc = spent / days * 30;
+  const cpl = c.cost / (c.aanv || 1), pcpl = p.cost / (p.aanv || 1), cpk = c.cost / (c.kwal || 1), pcpk = p.cost / (p.kwal || 1);
+  const planCpl = PLAN.cost / PLAN.aanv, planCpk = PLAN.cost / PLAN.kwal;
+  const gc = c.gLeads ? c.gclid / c.gLeads : null, pgc = p.gLeads ? p.gclid / p.gLeads : null;
+  const cards = [
+    ['Budget-pacing', Math.round(pace*100)+'%', st(pace >= .95 && pace <= 1.05, pace >= .85 && pace <= 1.15, ['Op tempo', pace > 1 ? 'Iets te snel' : 'Iets te traag', pace > 1 ? 'Te snel' : 'Te traag']),
+      `van het ideale tempo · ${ef.format(spent)} van ${ef.format(PLAN.cost)} na ${days} dagen · prognose ${ef.format(fc)}`],
+    ['Kosten per lead', ef.format(cpl), st(cpl <= planCpl, cpl <= planCpl*1.2), `${delta(cpl, pcpl, true)} · plan ${ef.format(planCpl)} · ${c.aanv} aanvragen`],
+    ['Kosten gekwal. lead', ef.format(cpk), st(cpk <= planCpk, cpk <= planCpk*1.2), `${delta(cpk, pcpk, true)} · plan ${ef.format(planCpk)} · ${c.aanv ? Math.round(c.kwal/c.aanv*100) : 0}% gekwalificeerd`],
+    ['gclid-dekking CRM', gc == null ? 'n.v.t.' : Math.round(gc*100)+'%', gc == null ? chip('todo','alleen Google') : st(gc >= .9, gc >= .7),
+      gc == null ? 'kies Google Ads of alle kanalen' : `${delta(gc, pgc)} · ${c.gclid} van ${c.gLeads} Google-leads met gclid · doel ≥ 90% (nodig voor offline conversies)`],
+  ];
+  document.getElementById('st-scores').innerHTML = cards.map(([l, v, s, ln]) => `<div class="comp score"><div class="lab"><span>${l}</span>${s}</div><div class="val">${v}</div><div class="ln">${ln}</div></div>`).join('');
+
+  // pacing chart
+  const lab = Array.from({length:30}, (_, i) => (i+1)+' nov');
+  let cum = 0; const act = lab.map((_, i) => { if (i >= days) return null; cum += sum(nov.filter(r => r.date.getDate() === i+1), r => r.cost); return Math.round(cum); });
+  const idealL = lab.map((_, i) => Math.round(PLAN.cost/30*(i+1)));
+  const fcL = lab.map((_, i) => i < days-1 ? null : Math.round(spent + spent/days*(i+1-days)));
+  mk('c-pace', {type:'line', data:{labels:lab, datasets:[
+      {label:'Besteed', data:act, borderColor:'#891729', backgroundColor:'#891729', borderWidth:2, pointRadius:0, pointHoverRadius:5, tension:.2},
+      {label:'Ideaal tempo', data:idealL, borderColor:'#202124', borderDash:[5,4], borderWidth:1.5, pointRadius:0, pointHoverRadius:4},
+      {label:'Prognose', data:fcL, borderColor:'#E0604C', borderDash:[2,3], borderWidth:2, pointRadius:0, pointHoverRadius:4}]},
+    options:{interaction:{mode:'index', intersect:false}, scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:8}}, y:{beginAtZero:true, grid, border:{display:false}, ticks:{callback:v=>'€ '+nf.format(v), padding:6}}},
+      plugins:{tooltip:{callbacks:{label:c => c.parsed.y == null ? null : ` ${c.dataset.label}: ${ef.format(c.parsed.y)}`}}}}});
+  const share = days / 30;
+  document.getElementById('pace-ch').innerHTML = ['Google Ads','Meta'].map(ch => {
+    const s = sum(nov.filter(r => r.ch === ch), r => r.cost), pct = s / BUDGET[ch];
+    return `<div class="r"><span><span class="dot" style="background:${COL[ch]}"></span>${ch}</span><div class="t" title="${ef.format(s)} van ${ef.format(BUDGET[ch])}"><b style="width:${Math.min(100,pct*100)}%;background:${COL[ch]}"></b><i style="left:${share*100}%"></i></div><span class="v">${ef.format(s)} / ${ef.format(BUDGET[ch])}</span></div>`;
+  }).join('') + `<div style="font-size:12px;color:var(--ink-3)">Verdeling 65/35 is een voorstel. Aanpassen in de Sheet zodra die gekoppeld is.</div>`;
+  const over = fc - PLAN.cost;
+  const sev = Math.abs(over) > PLAN.cost*.15 ? ' bad' : '';
+  document.getElementById('pace-signal').innerHTML = Math.abs(over) < PLAN.cost*.05
+    ? `<div class="signal ok"><b>✓</b><span>Op koers voor ${ef.format(PLAN.cost)} deze maand.</span></div>`
+    : over > 0 ? `<div class="signal${sev}"><b>!</b><span>Bij dit tempo kom je <b>${ef.format(over)}</b> boven budget uit. Verlaag de dagbudgetten met ongeveer ${Math.round(over/fc*100)}% (vooral in de campagnes met de hoogste kosten per lead).</span></div>`
+               : `<div class="signal${sev}"><b>!</b><span>Bij dit tempo blijft er <b>${ef.format(-over)}</b> liggen. Verhoog de dagbudgetten van de best presterende campagnes.</span></div>`;
+  renderCampTable(w);
+}
+let sk = 'cost', sd = -1;
+function renderCampTable(w){
+  const camps = [...new Set(U.map(u => u.camp))];
+  const list = camps.map(n => { const r = w.cur.filter(x => x.camp === n); if (!r.length) return null; const a = agg(r), ch = r[0].ch;
+    return {n, ch, cost:a.cost, cpc:a.cost/(a.clicks||1), ctr:a.clicks/(a.impr||1), cvr:a.aanv/(a.clicks||1), cpl:a.aanv ? a.cost/a.aanv : Infinity, kp:a.aanv ? a.kwal/a.aanv : 0, cpk:a.kwal ? a.cost/a.kwal : Infinity, aanv:a.aanv}; }).filter(Boolean);
+  list.sort((a, b) => (a[sk] > b[sk] ? 1 : a[sk] < b[sk] ? -1 : 0) * sd);
+  const sig = x => { const N = NORM[x.ch], out = [];
+    if (x.ctr < N.ctr.min) out.push(chip('warn','CTR laag')); if (x.cvr < N.cr.min) out.push(chip('warn','CVR laag'));
+    if (x.cpl > N.cpl.max) out.push(chip('bad','CPL hoog')); return out.length ? out.join(' ') : chip('ok','Op koers'); };
+  const cols = [['n','Campagne'],['ch','Kanaal'],['cost','Spend'],['cpc','CPC'],['ctr','CTR'],['cvr','CVR'],['cpl','CPL'],['kp','% gekwal.'],['cpk','Kosten gekwal.'],['sig','Signaal']];
+  const t = agg(w.cur);
+  document.getElementById('tbl-camp').innerHTML = `<thead><tr>${cols.map(([k,l]) => `<th class="${k!=='sig'?'s':''}" data-k="${k}" aria-sort="${k===sk?(sd<0?'descending':'ascending'):'none'}">${l}</th>`).join('')}</tr></thead><tbody>` +
+    list.map(x => `<tr><td>${x.n}</td><td><span class="dot" style="background:${COL[x.ch]}"></span>${x.ch}</td><td>${ef.format(x.cost)}</td><td>${ef2.format(x.cpc)}</td><td>${p1(x.ctr)}</td><td>${p1(x.cvr)}</td><td>${isFinite(x.cpl)?ef.format(x.cpl):'–'}</td><td>${Math.round(x.kp*100)}%</td><td>${isFinite(x.cpk)?ef.format(x.cpk):'–'}</td><td>${sig(x)}</td></tr>`).join('') +
+    `</tbody><tfoot><tr><td><b>Totaal</b></td><td></td><td><b>${ef.format(t.cost)}</b></td><td>${ef2.format(t.cost/(t.clicks||1))}</td><td>${p1(t.clicks/(t.impr||1))}</td><td>${p1(t.aanv/(t.clicks||1))}</td><td>${t.aanv?ef.format(t.cost/t.aanv):'–'}</td><td>${t.aanv?Math.round(t.kwal/t.aanv*100):0}%</td><td>${t.kwal?ef.format(t.cost/t.kwal):'–'}</td><td></td></tr></tfoot>`;
+  document.querySelectorAll('#tbl-camp th.s').forEach(th => th.onclick = () => { const k = th.dataset.k; sd = k === sk ? -sd : -1; sk = k; renderCampTable(win()); });
+}
+
+/* ================= GOOGLE VS META ================= */
+function track(v, za, zb, max, fmt, color){
+  const pc = x => Math.max(0, Math.min(100, x / max * 100)), a = pc(za), b = zb == null ? 100 : pc(zb);
+  return `<div class="track"><span class="zone" style="left:${a}%;width:${b-a}%"></span><span class="mk" data-v="${fmt(v)}" style="left:${pc(v)}%;background:${color}"></span></div><div class="scale">${[0,max/4,max/2,max*3/4,max].map(t => `<span>${fmt(t)}</span>`).join('')}</div>`;
+}
+function renderSplit(){
+  const w = win(), M = {};
+  ['Google Ads','Meta'].forEach(ch => { const c = agg(w.both.filter(r => r.ch === ch)), p = agg(w.bothPrev.filter(r => r.ch === ch));
+    M[ch] = {c, ctr:c.clicks/c.impr, cr:c.aanv/(c.clicks||1), cpl:c.cost/(c.aanv||1), pctr:p.clicks/p.impr, pcr:p.aanv/(p.clicks||1), pcpl:p.cost/(p.aanv||1)}; });
+  document.getElementById('vs-head').innerHTML = [
+    ['g','Google Search','High intent · zakelijke leads','Mensen zoeken zelf naar “locatie bedrijfsfeest Amersfoort” of “groepsdiner zakelijk”. Ze willen nu boeken.',['zoekt actief','bedrijfsfeest','groepsdiner','hogere CPL mag'], M['Google Ads']],
+    ['m','Meta Ads','Visueel · privé leads','Instagram en Facebook: binnenkort jarig, sfeervolle video’s van feestjes. Niemand zoekt actief, de creative moet het werk doen.',['interruptie','verjaardag','vriendinnen','CPL scherp houden'], M['Meta']],
+  ].map(([k,t,kick,p,tags,m]) => `<div class="chan ${k}"><div class="k">${kick}</div><h3>${t}</h3><p>${p}</p><div class="tags">${tags.map(x => `<span>${x}</span>`).join('')}</div><div class="big"><b>${m.c.aanv}</b><span>aanvragen · ${ef.format(m.c.cost)}</span></div></div>`).join('');
+  const R = [
+    ['CTR','kliks ÷ vertoningen', ch => { const m = M[ch], n = NORM[ch].ctr, ok = m.ctr >= n.min, warn = m.ctr >= n.min*.8;
+      const tip = ch === 'Google Ads' ? (ok ? 'Advertentietekst sluit goed aan op de zoekterm.' : 'Lage CTR: tekst sluit niet aan, of de concurrent toont betere USP’s (AV-apparatuur, gratis parkeren).')
+                                      : (ok ? 'De graadmeter voor de foto of video. Let op de weektrend hieronder.' : 'CTR zakt weg: advertentiemoeheid, vernieuw de video of foto.');
+      return `<div class="top"><span class="val">${p1(m.ctr)}</span>${st(ok, warn)}</div><div class="norm">norm ${n.max ? p1(n.min)+' – '+p1(n.max) : '> '+p1(n.min)} · ${delta(m.ctr, m.pctr)}</div>${track(m.ctr, n.min, n.max, n.scale, p1, COL[ch])}<div class="tip">${tip}</div>`; }],
+    ['Conversie (CR)','klik → aanvraag', ch => { const m = M[ch], n = NORM[ch].cr, ok = m.cr >= n.min;
+      const tip = ch === 'Google Ads' ? 'Hoort relatief hoog te liggen: de zoeker is al actief op zoek.' : 'Ligt lager: mensen oriënteren zich voor een feestje over een paar maanden.';
+      return `<div class="top"><span class="val">${p1(m.cr)}</span>${st(ok, m.cr >= n.min*.8)}</div><div class="norm">ondergrens ${p1(n.min)} · ${delta(m.cr, m.pcr)}</div>${track(m.cr, n.min, null, .08, p1, COL[ch])}<div class="tip">${tip}</div>`; }],
+    ['Kosten per lead (CPL)','kosten ÷ aanvragen', ch => { const m = M[ch], n = NORM[ch].cpl, ok = m.cpl <= n.max;
+      const tip = ch === 'Google Ads' ? 'Mag hoger: één zakelijke boeking (bijv. 50 man personeelsfeest) levert direct veel omzet op.' : 'Moet lager: privéfeestjes hebben een kleiner budget, dus scherp monitoren.';
+      return `<div class="top"><span class="val">${ef.format(m.cpl)}</span>${st(ok, m.cpl <= n.max*1.2)}</div><div class="norm">maximaal ${ef.format(n.max)} · ${delta(m.cpl, m.pcpl, true)}</div>${track(m.cpl, 0, n.max, 60, v => '€ '+Math.round(v), COL[ch])}<div class="tip">${tip}</div>`; }],
+  ];
+  document.getElementById('vs-kpis').innerHTML = `<div class="kpi-row" style="padding:0 0 4px;border:0"><div></div><div class="legend" style="margin:0"><span><i style="background:${COL['Google Ads']}"></i>Google Search</span></div><div class="legend" style="margin:0"><span><i style="background:${COL['Meta']}"></i>Meta</span></div></div>` +
+    R.map(([n, sub, fn]) => `<div class="kpi-row"><div class="kpi-name"><b>${n}</b><span>${sub}</span></div><div class="bm">${fn('Google Ads')}</div><div class="bm">${fn('Meta')}</div></div>`).join('');
+  const band = {id:'band', beforeDatasetsDraw(c, a, o){ const {ctx, chartArea:ca, scales:{y}} = c, top = y.getPixelForValue(o.hi == null ? y.max : o.hi), bot = y.getPixelForValue(o.lo); ctx.save(); ctx.fillStyle = 'rgba(24,128,56,.10)'; ctx.fillRect(ca.left, top, ca.right-ca.left, bot-top); ctx.restore(); }};
+  [['Google Ads','g'],['Meta','m']].forEach(([ch, k]) => {
+    const n = NORM[ch].ctr, data = chunks.map(c => { const r = rows.filter(x => x.ch === ch && x.d >= c.a && x.d <= c.b); return +(sum(r, x => x.clicks) / sum(r, x => x.impr) * 100).toFixed(2); });
+    mk('c-ctr-'+k, {type:'line', data:{labels:chunks.map(c => c.label), datasets:[{data, borderColor:COL[ch], backgroundColor:COL[ch], borderWidth:2, pointRadius:4, pointHoverRadius:6, pointBorderColor:'#fff', pointBorderWidth:2, tension:.25}]},
+      options:{scales:{x:{grid:{display:false}}, y:{min:0, suggestedMax:n.scale*100*.75, grid, border:{display:false}, ticks:{callback:v => v.toLocaleString('nl-NL')+'%', padding:6}}},
+        plugins:{band:{lo:n.min*100, hi:n.max == null ? null : n.max*100}, tooltip:{callbacks:{title:i => 'week van '+i[0].label, label:c => ' CTR '+c.parsed.y.toLocaleString('nl-NL')+'%'}}}}, plugins:[band]});
+    const f = (data[0]+data[1])/2, l = (data[6]+data[7])/2, drop = 1 - l/f;
+    document.getElementById('sig-'+k).innerHTML = drop > .12
+      ? `<div class="signal"><b>!</b><span>CTR ${Math.round(drop*100)}% lager dan 6 weken geleden. ${ch === 'Meta' ? 'Waarschijnlijk advertentiemoeheid: zie tab Creatives.' : 'Check zoektermen en advertentieteksten.'}</span></div>`
+      : `<div class="signal ok"><b>✓</b><span>CTR stabiel (${drop > 0 ? '−' : '+'}${Math.abs(Math.round(drop*100))}% t.o.v. 6 weken geleden).</span></div>`;
+  });
+}
+
+/* ================= ZOEKTERMEN (demo, laatste 30 dagen) ================= */
+const TERMS = [
+  ['bedrijfsfeest amersfoort','Bedrijfsfeest',58,1.92,4,0,'keep'],
+  ['personeelsfeest locatie amersfoort','Bedrijfsfeest',34,2.08,2,0,'keep'],
+  ['kerstborrel bedrijf amersfoort','Bedrijfsfeest',21,2.31,3,1,'add'],
+  ["kerstdiner met collega's amersfoort",'Groepsdiner zakelijk',14,1.84,1,1,'add'],
+  ['dinnershow amersfoort','Groepsdiner zakelijk',17,1.41,1,1,'add'],
+  ['groepsdiner amersfoort','Groepsdiner zakelijk',46,1.52,3,0,'keep'],
+  ['restaurant grote groep utrecht','Groepsdiner zakelijk',19,1.70,0,1,'watch'],
+  ['dolle diva','Brand',102,.41,6,0,'keep'],
+  ['dolle diva menu','Brand',31,.36,1,0,'keep'],
+  ['dolle mina','Brand',12,.52,0,1,'neg'],
+  ['dolle diva vacature','Brand',9,.44,0,1,'neg'],
+  ['vacature horeca amersfoort','Bedrijfsfeest',9,1.63,0,1,'neg'],
+  ['zaal huren gratis','Bedrijfsfeest',7,1.88,0,1,'neg'],
+  ['bedrijfsuitje amersfoort goedkoop','Bedrijfsfeest',11,1.79,0,1,'neg'],
+];
+const ADV = {keep:['ok','Houden'], add:['info','Toevoegen als zoekwoord'], watch:['warn','In de gaten houden'], neg:['bad','Uitsluiten']};
+const NEGKW = {'dolle mina':'"dolle mina"', 'dolle diva vacature':'vacature', 'vacature horeca amersfoort':'vacature', 'zaal huren gratis':'gratis', 'bedrijfsuitje amersfoort goedkoop':'goedkoop'};
+function renderTerms(){
+  document.getElementById('tbl-terms').innerHTML = '<thead><tr><th>Zoekterm</th><th>Campagne</th><th>Kliks</th><th>Kosten</th><th>Aanvragen</th><th>CPL</th><th>Voorstel</th></tr></thead><tbody>' +
+    TERMS.map(([t, c, k, cpc, a, nw, adv]) => `<tr><td>${t}${nw ? ' <b title="nieuw deze maand" style="color:var(--coral)">✱</b>' : ''}</td><td>${c}</td><td>${k}</td><td>${ef.format(k*cpc)}</td><td>${a}</td><td>${a ? ef.format(k*cpc/a) : '–'}</td><td>${chip(...ADV[adv])}</td></tr>`).join('') + '</tbody>';
+  const negs = [...new Set(TERMS.filter(t => t[6] === 'neg').map(t => NEGKW[t[0]] || `[${t[0]}]`))];
+  const wasted = TERMS.filter(t => t[6] === 'neg').reduce((s, t) => s + t[2]*t[3], 0);
+  document.getElementById('neg').value = negs.join('\n');
+  document.getElementById('add').innerHTML = TERMS.filter(t => t[6] === 'add').map(t => `<li><code>[${t[0]}]</code> · ${t[4]} aanvragen uit ${t[2]} kliks</li>`).join('') +
+    `<li style="list-style:none;margin-left:-18px;color:var(--ink-2)">Uitsluitingen besparen ongeveer <b>${ef.format(wasted)}</b> per 30 dagen aan kliks zonder aanvraag.</li>`;
+  document.getElementById('copy-neg').onclick = () => { const ta = document.getElementById('neg'); ta.select(); let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e){} if (!ok && navigator.clipboard) navigator.clipboard.writeText(ta.value).then(() => {}, () => {});
+    document.getElementById('copied').textContent = 'Gekopieerd'; setTimeout(() => document.getElementById('copied').textContent = '', 1800); };
+}
+
+/* ================= CREATIVES ================= */
+const ads = U.map((u, ui) => ({u, ui})).filter(x => x.u.ad);
+const freqOf = (u, live) => u.fatigue ? 1.4 + 3 * (1 - Math.exp(-live / 45)) : 1.2 + 1.3 * (1 - Math.exp(-live / 60));
+function renderCreatives(){
+  const w = win();
+  const list = ads.map(({u, ui}) => {
+    const r = w.both.filter(x => x.ui === ui); if (!r.length) return {u, empty:true};
+    const a = agg(r), live = r[r.length-1].live, fat = sum(r, x => x.fat) / r.length;
+    const half = Math.max(1, Math.floor(r.length / 2)), f1 = r.slice(0, half), f2 = r.slice(-half);
+    const c1 = sum(f1, x => x.clicks) / sum(f1, x => x.impr), c2 = sum(f2, x => x.clicks) / sum(f2, x => x.impr);
+    return {u, ctr:a.clicks/a.impr, cpl:a.aanv ? a.cost/a.aanv : Infinity, cost:a.cost, aanv:a.aanv, thumb:u.thumb ? u.thumb * fat : null, freq:freqOf(u, live), live, chg:c2/c1 - 1};
+  });
+  const advice = x => (x.freq > 3 || x.chg < -.2 || (x.thumb != null && x.thumb < .25)) ? chip('bad','Nieuwe creative') : (x.freq > 2.5 || x.chg < -.1) ? chip('warn','In de gaten houden') : chip('ok','Prima');
+  document.getElementById('tbl-cre').innerHTML = '<thead><tr><th>Advertentie</th><th>Campagne</th><th>Thumbstop</th><th>CTR</th><th>CTR-verloop</th><th>Frequentie</th><th>CPL</th><th>Dagen live</th><th>Advies</th></tr></thead><tbody>' +
+    list.map(x => x.empty ? `<tr><td>${x.u.ad}</td><td>${x.u.camp}</td><td colspan="7" style="text-align:left;color:var(--ink-3)">nog niet live in deze periode</td></tr>` :
+      `<tr><td>${x.u.ad}</td><td>${x.u.camp.replace('Meta · ','')}</td><td>${x.thumb != null ? p1(x.thumb) : '–'}</td><td>${p1(x.ctr)}</td><td style="color:${x.chg < -.1 ? 'var(--bad)' : 'var(--ink)'}">${x.chg > 0 ? '+' : ''}${Math.round(x.chg*100)}%</td><td>${x.freq.toLocaleString('nl-NL',{maximumFractionDigits:1})}</td><td>${isFinite(x.cpl) ? ef.format(x.cpl) : '–'}</td><td>${x.live}</td><td>${advice(x)}</td></tr>`).join('') + '</tbody>';
+  // thumbstop per week (Reels, fixed colour order)
+  const reels = ads.filter(x => x.u.fmt === 'Reel'), RC = ['#E0604C','#A8233A','#3E6FB0'];
+  document.getElementById('lg-thumb').innerHTML = reels.map((x, i) => `<span><i style="background:${RC[i]}"></i>${x.u.ad.replace('Reel · ','')}</span>`).join('');
+  mk('c-thumb', {type:'line', data:{labels:chunks.map(c => c.label), datasets:reels.map((x, i) => ({label:x.u.ad.replace('Reel · ',''), borderColor:RC[i], backgroundColor:RC[i], borderWidth:2, pointRadius:3, pointHoverRadius:6, pointBorderColor:'#fff', pointBorderWidth:2, tension:.25, spanGaps:false,
+      data:chunks.map(c => { const r = rows.filter(z => z.ui === x.ui && z.d >= c.a && z.d <= c.b); return r.length ? +(x.u.thumb * sum(r, z => z.fat) / r.length * 100).toFixed(1) : null; })}))},
+    options:{interaction:{mode:'index', intersect:false}, scales:{x:{grid:{display:false}}, y:{min:0, max:50, grid, border:{display:false}, ticks:{callback:v => v+'%', padding:6}}},
+      plugins:{tooltip:{callbacks:{label:c => c.parsed.y == null ? null : ` ${c.dataset.label}: ${c.parsed.y.toLocaleString('nl-NL')}%`}}}}, plugins:[hline(25, '#C5221F', 'grens 25%')]});
+  const fl = list.filter(x => !x.empty).sort((a, b) => b.freq - a.freq);
+  mk('c-freq', {type:'bar', data:{labels:fl.map(x => x.u.ad.replace(/^(Reel|Foto|Carrousel) · /,'')), datasets:[{data:fl.map(x => +x.freq.toFixed(1)), backgroundColor:'#A8233A', borderRadius:4, borderSkipped:'start', maxBarThickness:20}]},
+    options:{indexAxis:'y', scales:{x:{min:0, suggestedMax:5, grid, border:{display:false}}, y:{grid:{display:false}}}, plugins:{tooltip:{callbacks:{label:c => ` frequentie ${c.parsed.x.toLocaleString('nl-NL')}${c.parsed.x > 3 ? ' (boven 3)' : ''}`}}}},
+    plugins:[{id:'f3', afterDatasetsDraw(c){ const {ctx, chartArea:a, scales:{x}} = c, px = x.getPixelForValue(3); ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle = '#C5221F'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke(); ctx.restore(); }}]});
+}
+
+/* ================= MEETGEZONDHEID ================= */
+function byDay(a, b){
+  const out = []; for (let d = a; d <= b; d++){ const r = rows.filter(x => x.d === d); const crm = sum(r, x => x.a[0] + x.a[1]), cons = r[0].consent;
+    out.push({d, date:r[0].date, crm, ga4:Math.round(crm * cons * .97), plat:Math.round(crm * (.7 + cons * .6)), cons}); } return out;
+}
+function renderHealth(){
+  const w = win(), D = byDay(w.a, LAST), P = byDay(w.a - w.n, w.a - 1);
+  const s = (arr, k) => arr.reduce((t, x) => t + x[k], 0);
+  const crm = s(D,'crm'), ga4 = s(D,'ga4'), plat = s(D,'plat'), cons = s(D,'cons') / D.length, pcons = s(P,'cons') / P.length;
+  const g = ga4 / (crm || 1), pl = plat / (crm || 1);
+  const cards = [
+    ['Leads in CRM', nf.format(crm), chip('info','de waarheid'), `${delta(crm, s(P,'crm'))} · Zenchef / Sheet`],
+    ['GA4 vs CRM', Math.round(g*100)+'%', st(g >= .8, g >= .6), `GA4 telt ${ga4} van ${crm} leads · mist vooral bezoekers zonder toestemming`],
+    ['Ads + Meta vs CRM', Math.round(pl*100)+'%', st(pl >= .85 && pl <= 1.15, pl >= .7 && pl <= 1.3), `platformen claimen ${plat} leads · ${pl > 1.02 ? 'meer dan er echt zijn (dubbel of gemodelleerd)' : pl < .98 ? 'minder dan er echt zijn' : 'komt overeen met het CRM'}`],
+    ['Consent-ratio', p1(cons), st(cons >= .65, cons >= .55), `${delta(cons, pcons)} · alarm onder 55%`],
+  ];
+  document.getElementById('mg-scores').innerHTML = cards.map(([l, v, c, ln]) => `<div class="comp score"><div class="lab"><span>${l}</span>${c}</div><div class="val">${v}</div><div class="ln">${ln}</div></div>`).join('');
+  const W = chunks.map(c => byDay(c.a, c.b));
+  mk('c-match', {type:'bar', data:{labels:chunks.map(c => c.label), datasets:[
+      {label:'CRM', data:W.map(x => s(x,'crm')), backgroundColor:'#891729', borderRadius:4, borderSkipped:'bottom', maxBarThickness:16},
+      {label:'GA4', data:W.map(x => s(x,'ga4')), backgroundColor:'#3E6FB0', borderRadius:4, borderSkipped:'bottom', maxBarThickness:16},
+      {label:'Google Ads + Meta', data:W.map(x => s(x,'plat')), backgroundColor:'#E0604C', borderRadius:4, borderSkipped:'bottom', maxBarThickness:16}]},
+    options:{interaction:{mode:'index', intersect:false}, datasets:{bar:{categoryPercentage:.7, barPercentage:.9}}, scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid, border:{display:false}, ticks:{precision:0, padding:6}}},
+      plugins:{tooltip:{callbacks:{title:i => 'week van '+i[0].label, label:c => ` ${c.dataset.label}: ${c.parsed.y} leads`}}}}});
+  const C = byDay(LAST - 29, LAST);
+  mk('c-consent', {type:'line', data:{labels:C.map(x => x.date.toLocaleDateString('nl-NL',{day:'numeric',month:'short'})), datasets:[{data:C.map(x => +(x.cons*100).toFixed(1)), borderColor:'#891729', borderWidth:2, tension:.3,
+      pointRadius:C.map(x => x.cons < .55 ? 5 : 0), pointBackgroundColor:'#C5221F', pointBorderColor:'#fff', pointBorderWidth:2, pointHoverRadius:5}]},
+    options:{interaction:{mode:'index', intersect:false}, scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:7}}, y:{min:30, max:90, grid, border:{display:false}, ticks:{callback:v => v+'%', padding:6}}},
+      plugins:{tooltip:{callbacks:{label:c => ` ${c.parsed.y.toLocaleString('nl-NL')}% accepteert${c.parsed.y < 55 ? ' (onder alarmgrens)' : ''}`}}}}, plugins:[hline(55, '#C5221F', 'alarm 55%')]});
+}
+
+function renderAll(){ renderSteer(); renderSplit(); renderTerms(); renderCreatives(); renderHealth(); }
+per.onchange = renderAll; chn.onchange = renderAll;
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => setTimeout(() => Object.values(charts).forEach(c => c.resize()), 0)));
+renderAll();
+})();
+
+</script>
+</body>
+</html>
