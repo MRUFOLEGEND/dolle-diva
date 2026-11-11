@@ -312,7 +312,7 @@ textarea.neg{width:100%;min-height:120px;border:1px solid var(--rule);border-rad
       <div class="sub">zonder dit klopt geen enkel getal in het klantdashboard</div>
       <ol style="padding-left:18px;display:grid;gap:8px;font-size:13.5px">
         <li><b>Cookiebanner (CMP)</b> plaatsen met Google Consent Mode v2, via GTM.</li>
-        <li><b>Meta- en TikTok-pixel</b> uit de thema-HTML halen en via GTM laden, pas na toestemming.</li>
+        <li><b>Meta-pixel</b> uit de thema-HTML halen en via GTM laden, pas na toestemming. <b>TikTok-pixel</b> helemaal verwijderen (TikTok zit niet in de kanaalmix).</li>
         <li><b>Dubbele GTM-snippet</b> verwijderen (container laadt 2×).</li>
         <li><b>GA4 + Ads-conversies</b> op de Zenchef-stappen zetten (dataLayer-events zijn er al).</li>
         <li><b>Zenchef-boekingen terugkoppelen</b> naar Google Ads (offline/enhanced conversions) en Meta (CAPI), alleen met toestemming.</li>
@@ -330,7 +330,6 @@ textarea.neg{width:100%;min-height:120px;border:1px solid var(--rule);border-rad
     <div class="col"><h5>1 · Bezoeker</h5>
       <div class="node"><b>Google Search</b><span>gclid / gbraid</span><i class="arrow">→</i></div>
       <div class="node"><b>Meta (IG/FB)</b><span>fbclid</span><i class="arrow">→</i></div>
-      <div class="node"><b>TikTok</b><span>ttclid</span><i class="arrow">→</i></div>
       <div class="node"><b>Organisch / direct</b><span>SEO, Maps, social bio</span><i class="arrow">→</i></div>
     </div>
     <div class="col"><h5>2 · Website</h5>
@@ -347,7 +346,6 @@ textarea.neg{width:100%;min-height:120px;border:1px solid var(--rule);border-rad
       <div class="node"><b>GA4</b><span>events + conversies</span><i class="arrow">→</i></div>
       <div class="node"><b>Google Ads</b><span>conversies, enhanced + offline</span><i class="arrow">→</i></div>
       <div class="node k"><b>Meta Pixel + CAPI</b><span>pixel staat nu hard in HTML</span><i class="arrow">→</i></div>
-      <div class="node k"><b>TikTok Pixel</b><span>staat nu hard in HTML</span><i class="arrow">→</i></div>
     </div>
     <div class="col"><h5>5 · Rapportage</h5>
       <div class="node"><b>Looker Studio</b><span>klantrapport + dit dashboard</span></div>
@@ -409,7 +407,7 @@ const store = {
 const FINDINGS = [
   ['bad','Kritiek','Geen cookiebanner zichtbaar','Na 5 seconden op de homepage verscheen geen toestemmingsvenster, en er laadt geen bekend CMP-script.','Plaats een CMP (bijv. Cookiebot, CookieYes, Complianz) met Consent Mode v2 en een even makkelijke “weigeren”-knop.'],
   ['bad','Kritiek','Meta Pixel vuurt zonder toestemming','fbevents.js staat hard in de thema-HTML en stuurt direct een PageView.','Uit de HTML halen, via GTM laden met trigger “consent ad_storage = granted”.'],
-  ['bad','Kritiek','TikTok Pixel vuurt zonder toestemming','events.js staat hard in de HTML en roept direct ttq.page() aan.','Zelfde aanpak als Meta, of uitzetten als TikTok niet actief geadverteerd wordt.'],
+  ['bad','Kritiek','Oude TikTok-pixel vuurt zonder toestemming','events.js staat nog hard in de HTML en roept direct ttq.page() aan, terwijl TikTok niet in de kanaalmix zit.','Pixel helemaal uit de thema-HTML verwijderen.'],
   ['warn','Hoog','Geen Consent Mode-signaal','Er staat geen consent-default in de dataLayer, dus Google-tags weten niet wat mag. Zonder Consent Mode v2 werken remarketing en conversiemodellering in de EER beperkt.','Default “denied” vóór GTM laden, en via de CMP updaten.'],
   ['warn','Hoog','GTM-container laadt twee keer','Er staan twee gtm.js-events in de dataLayer. Dat geeft risico op dubbele paginaweergaven en conversies.','Eén van de twee snippets verwijderen (thema óf plugin).'],
   ['info','Kans','Zenchef stuurt events naar de dataLayer','Gezien: <code>zcf-bookings-navigated</code> met de pagina van de widgetstap. Daarmee is de reserveringsfunnel stap voor stap te meten.','In GTM-preview alle zcf-events loggen; de stap “bevestiging” wordt de aanvraag-conversie.'],
@@ -422,14 +420,13 @@ const SOURCES = [
   ['gtm','Google Tag Manager','Welke tags/triggers draaien, consent-instellingen, versiehistorie','Geen connector; handmatig of via GTM API → Sheet','per publicatie','Publiceren op GTM-NNZ7Q6P'],
   ['ads','Google Ads','Kosten, kliks, vertoningen, zoektermen, conversies (incl. offline)','Native: Google Ads','dagelijks','Standaard toegang via MCC'],
   ['meta','Meta Ads','Kosten, bereik, kliks, leads, Pixel/CAPI-events, Event Match Quality','Partnerconnector (bijv. Supermetrics, Windsor.ai, Porter) of export naar Sheets/BigQuery','dagelijks','Business Manager: partner op advertentieaccount + pixel'],
-  ['tiktok','TikTok Ads','Alleen als er geadverteerd wordt: kosten, kliks, events','Partnerconnector of export','dagelijks','TikTok Business Center'],
   ['zen','Zenchef','Aanvragen, boekingen, status (bevestigd/geannuleerd/no-show), groepsgrootte, type','Export of webhook → Google Sheets (of BigQuery)','dagelijks of realtime','Admin-account Zenchef / API-key via de klant'],
   ['cmp','Cookiebanner (CMP)','Consent-acceptatie per categorie, per dag, per apparaat','CMP-export → Sheets, of GA4-dimensie consent','dagelijks','Beheer in CMP-account'],
   ['gsc','Search Console','Organische zoekwoorden, vertoningen, posities (merk vs niet-merk)','Native: Search Console','dagelijks (± 2 d)','Eigenaar of volledige gebruiker'],
   ['sheet','Doelen & budget (Sheet)','Maandbudget per kanaal, doelen (€ 125/boeking), afspraken “gekwalificeerd”','Native: Google Sheets','handmatig','Wij'],
 ];
 const SRC_STATUS = [['todo','Nog niet gestart'],['warn','Bezig'],['ok','Gekoppeld'],['bad','Probleem']];
-const srcState = store.get('src', {ga4:'todo', gtm:'todo', ads:'todo', meta:'bad', tiktok:'bad', zen:'todo', cmp:'bad', gsc:'todo', sheet:'todo'});
+const srcState = store.get('src', {ga4:'todo', gtm:'todo', ads:'todo', meta:'bad', zen:'todo', cmp:'bad', gsc:'todo', sheet:'todo'});
 
 /* ---------- measurement plan ---------- */
 const PLAN = [
@@ -448,14 +445,14 @@ const CHECKS = {
   'Cookiebanner & Consent Mode v2': [
     ['c1','CMP gekozen en geplaatst via GTM','Bijv. Cookiebot, CookieYes of Complianz (Google-gecertificeerd)','Consent'],
     ['c2','“Weigeren” even zichtbaar en makkelijk als “Accepteren”','AP: geen verstopte weigerknop, geen vooraf aangevinkte vakjes','AP'],
-    ['c3','Geen marketing- of analysecookies vóór toestemming','Meta, TikTok en GA4 pas na consent (behalve geanonimiseerde basis)','Consent'],
+    ['c3','Geen marketing- of analysecookies vóór toestemming','Meta en GA4 pas na consent (behalve geanonimiseerde basis)','Consent'],
     ['c4','Consent Mode v2 default = denied, vóór GTM','ad_storage, analytics_storage, ad_user_data, ad_personalization','Google'],
     ['c5','Consent wordt bijgewerkt na keuze (update-commando)','Controleren in Tag Assistant: “Consent” tab','Google'],
     ['c6','Toestemming intrekken kan altijd (vaste link/knop)','bijv. “Cookie-instellingen” in de footer','AP'],
     ['c7','Consent-logs worden bewaard','Bewijs van toestemming (CMP doet dit meestal)','AVG'],
   ],
   'Tags & platformen': [
-    ['t1','Hardcoded Meta- en TikTok-pixel uit thema verwijderd','Nu nog in de HTML gevonden (10 nov)','GTM'],
+    ['t1','Hardcoded Meta-pixel uit thema (naar GTM) en oude TikTok-pixel verwijderd','Nu nog in de HTML gevonden (10 nov)','GTM'],
     ['t2','Dubbele GTM-snippet verwijderd','Container laadt nu 2×','GTM'],
     ['t3','GA4: Google Signals bewust aan/uit, dataretentie ingesteld','2 of 14 maanden; langer = BigQuery-export','GA4'],
     ['t4','GA4: interne verkeer en spam uitgesloten','IP-filter voor het team, ongewenste verwijzers','GA4'],
@@ -465,13 +462,13 @@ const CHECKS = {
     ['t8','Meta: domein geverifieerd, events geprioriteerd','Business Manager → Merkveiligheid → Domeinen','Meta'],
   ],
   'AVG & documenten': [
-    ['a1','Privacyverklaring noemt GA4, Google Ads, Meta, TikTok, Zenchef','Doel, grondslag, bewaartermijn, doorgifte buiten EU','AVG'],
+    ['a1','Privacyverklaring noemt GA4, Google Ads, Meta, Zenchef','Doel, grondslag, bewaartermijn, doorgifte buiten EU','AVG'],
     ['a2','Cookieverklaring met lijst van cookies','CMP genereert die meestal automatisch','AP'],
     ['a3','Verwerkersovereenkomst met Zenchef','Zenchef verwerkt gastgegevens namens Dolle Diva','AVG'],
     ['a4','Verwerkersovereenkomst met ons (bureau)','Wij hebben toegang tot accounts en data','AVG'],
     ['a5','Google Ads Data Processing Terms geaccepteerd','Google Ads → Beheerder → Instellingen','AVG'],
     ['a6','Meta-voorwaarden (o.a. gezamenlijke verwerking pixel)','Bij pixelgebruik is Dolle Diva mede-verantwoordelijk','AVG'],
-    ['a7','Doorgifte VS afgedekt (EU-US Data Privacy Framework)','Google, Meta: gecertificeerd. TikTok: aparte afweging','AVG'],
+    ['a7','Doorgifte VS afgedekt (EU-US Data Privacy Framework)','Google, Meta: gecertificeerd','AVG'],
     ['a8','Register van verwerkingsactiviteiten bijgewerkt','Marketing, reserveringen, nieuwsbrief','AVG'],
     ['a9','Proces voor inzage- en verwijderverzoeken','Wie haalt gegevens uit Zenchef, Ads en Meta-lijsten?','AVG'],
     ['a10','Alleen gehashte gegevens naar Ads/Meta, minimaal nodig','Geen namen, geen telefoonnummers zonder noodzaak','AVG'],
@@ -504,8 +501,8 @@ function renderSources(){
 }
 function renderPlan(){
   const cell = v => v === '–' ? '<td class="c no">–</td>' : `<td><code>${v}</code></td>`;
-  document.getElementById('tbl-plan').innerHTML = `<thead><tr><th>dataLayer-event</th><th>Wanneer</th><th>GA4</th><th>Google Ads</th><th>Meta</th><th>TikTok</th><th>Consent nodig</th><th>Parameters</th></tr></thead><tbody>` +
-    PLAN.map(([e,w,g,a,m,t,c,p]) => `<tr><td><code>${e}</code></td><td>${w}</td>${cell(g)}<td>${a}</td>${cell(m)}${cell(t)}<td>${c}</td><td class="mono">${p}</td></tr>`).join('') + '</tbody>';
+  document.getElementById('tbl-plan').innerHTML = `<thead><tr><th>dataLayer-event</th><th>Wanneer</th><th>GA4</th><th>Google Ads</th><th>Meta</th><th>Consent nodig</th><th>Parameters</th></tr></thead><tbody>` +
+    PLAN.map(([e,w,g,a,m,t,c,p]) => `<tr><td><code>${e}</code></td><td>${w}</td>${cell(g)}<td>${a}</td>${cell(m)}<td>${c}</td><td class="mono">${p}</td></tr>`).join('') + '</tbody>';
 }
 function renderChecks(){
   document.getElementById('checklists').innerHTML = Object.entries(CHECKS).map(([g, items]) =>
@@ -528,7 +525,6 @@ function renderHealth(){
     ['GA4', 'via GTM (te bevestigen)', st('ga4'), pct(['t3','t4'])],
     ['Google Ads', 'offline + enhanced conversions', st('ads'), pct(['t5','t6'])],
     ['Meta', 'pixel hardcoded, geen CAPI', st('meta'), pct(['t7','t8'])],
-    ['TikTok', 'pixel hardcoded', st('tiktok'), pct(['t1'])],
     ['Zenchef', 'boekingen = de waarheid', st('zen'), srcState.zen==='ok'?100:srcState.zen==='warn'?50:0],
     ['AVG & documenten', 'privacy, verwerkers, register', null, pct(['a1','a2','a3','a4','a5','a6','a7','a8','a9','a10'])],
   ];
