@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dolle Diva Maandrapport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --canvas:#EEF0F2; --page:#FFFFFF; --ink:#202124; --ink-2:#5F6368; --ink-3:#80868B; --rule:#E3E5E8; --rule-2:#F1F3F4;
+  --coral:#E96C59; --bordeaux:#891729; --blush:#F9CECA; --cream:#FEF8F9;
+  --zak:#3E6FB0; --priv:#C08A1E;
+  --good:#188038; --good-bg:#E6F4EA; --bad:#C5221F; --bad-bg:#FCE8E6; --warn-bg:#FEF7E0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--canvas)}
+body{font-family:Roboto,system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.appbar{position:sticky;top:0;z-index:10;background:#fff;border-top:4px solid var(--coral);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:14px;padding:10px 20px;flex-wrap:wrap}
+.badge{width:40px;height:40px;border-radius:10px;background:var(--bordeaux);display:grid;place-items:center;flex:none}
+.badge svg{width:22px;height:auto}
+.titles{flex:1;min-width:200px}
+.titles h1{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:20px;letter-spacing:-.01em;line-height:1.1}
+.titles p{font-size:12px;color:var(--ink-2)}
+.ctrl{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:6px;padding:6px 10px;background:#fff;font-size:13px;color:var(--ink-2)}
+.ctrl svg{width:16px;height:16px;fill:var(--ink-2)}
+.ctrl select{border:0;background:transparent;font:500 14px Roboto,sans-serif;color:var(--ink);cursor:pointer;outline:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.demo{margin-top:14px;background:var(--warn-bg);color:#5c3b00;border:1px solid #F6DFA6;border-radius:8px;padding:9px 14px;font-size:13px}
+.sheet{margin:14px 0 30px;background:var(--page);border-radius:8px;box-shadow:0 1px 2px rgba(60,64,67,.15),0 1px 3px 1px rgba(60,64,67,.08);padding:22px}
+.q{font-size:13px;color:var(--ink-3);margin-bottom:12px}
+.q b{color:var(--bordeaux);font-weight:500}
+.grid{display:grid;gap:16px}
+.g-4{grid-template-columns:repeat(4,1fr)}.g-2{grid-template-columns:1fr 1fr}.g-21{grid-template-columns:1.25fr 1fr}
+.mt{margin-top:18px}
+.comp{border:1px solid var(--rule);border-radius:8px;padding:14px 16px;background:#fff;min-width:0}
+.comp h3{font-size:14px;font-weight:500}
+.comp .sub{font-size:12px;color:var(--ink-3);margin-bottom:10px}
+.score .lab{font-size:13px;color:var(--ink-2)}
+.score .val{font-size:32px;font-weight:500;margin:4px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.score .ln{font-size:12px;color:var(--ink-3);margin-top:6px}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:500;padding:1px 6px;border-radius:4px;font-variant-numeric:tabular-nums}
+.delta.up{color:var(--good);background:var(--good-bg)}.delta.down{color:var(--bad);background:var(--bad-bg)}.delta.flat{color:var(--ink-2);background:var(--rule-2)}
+.score.hero{background:var(--bordeaux);border-color:var(--bordeaux);color:#fff}
+.score.hero .lab,.score.hero .ln{color:var(--blush)}
+.score.hero .delta{background:rgba(255,255,255,.16)}.score.hero .delta.up{color:#CFF5D9}.score.hero .delta.down{color:#FFD2CC}.score.hero .delta.flat{color:#fff}
+.score.hero2{background:var(--coral);border-color:var(--coral);color:#2A0B10}
+.score.hero2 .lab,.score.hero2 .ln{color:rgba(42,11,16,.75)}
+.score.hero2 .delta{background:rgba(255,255,255,.4)}.score.hero2 .delta.up{color:#0B5A24}.score.hero2 .delta.down{color:#8A1512}
+.chart{position:relative;height:250px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.legend i.dash{height:0;border-top:2px dashed var(--ink);border-radius:0;vertical-align:3px}
+/* segment bars */
+.seg{display:grid;gap:14px;margin-top:8px}
+.seg .row{display:grid;grid-template-columns:96px 1fr 44px;gap:10px;align-items:center}
+.seg .nm{font-size:13px;font-weight:500}
+.seg .bar{display:flex;height:30px;border-radius:4px;overflow:hidden;gap:2px;background:#fff}
+.seg .bar span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#fff;min-width:0;white-space:nowrap}
+.seg .bar span.p{color:#2A1A00}
+.seg .tot{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.tbl th{font-weight:500;color:var(--ink-2);text-align:right;padding:7px 10px;border-bottom:1px solid var(--rule);background:#FAFAFB;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--rule-2);text-align:right}
+.chip{font-size:11px;font-weight:500;padding:1px 7px;border-radius:999px;margin-left:6px}
+.chip.z{background:#E7EEF8;color:#2B5288}.chip.p{background:#F8EEDA;color:#7A560E}
+/* lessons */
+.lessons{background:var(--cream);border-color:var(--blush)}
+.lessons h3{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:18px;color:var(--bordeaux);margin-bottom:12px}
+.ls{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.l{background:#fff;border:1px solid var(--blush);border-radius:8px;padding:14px}
+.l .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--bordeaux);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px}
+.l p{font-size:14px}
+.l .act{margin-top:10px;padding-top:10px;border-top:1px dashed var(--blush);font-size:13.5px}
+.l .act b{color:var(--bordeaux)}
+footer{font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:30px}
+@media (max-width:980px){.g-4{grid-template-columns:repeat(2,1fr)}.ls{grid-template-columns:1fr}}
+@media (max-width:760px){.g-2,.g-21{grid-template-columns:1fr}}
+@media (max-width:480px){.g-4{grid-template-columns:1fr}.sheet{padding:14px}.appbar{padding:10px 16px}}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="badge" aria-hidden="true"><svg viewBox="0 0 94 120" aria-label="Dolle Diva"><g fill="#fef8f9"><path d="M27.1,54.2c6.3,0,12.7-2.4,19.6-1.1-1.5-2.4-2.4-15.2-2.4-27.6s.6-21.5,2-24.7c-9,2.1-14.3-.8-22-.8C12.3,0,2,7.4,2,26.7s8.2,27.5,25.1,27.5ZM28.4,53.4c-7.8.3-10.6-17.7-10.6-28.2S20.7.6,28.4.8c.6,8.3,1,17.3,1,26.3s-.3,18-1,26.3Z"/><path d="M66.3,54.2c-6.3,0-12.7-2.4-19.6-1.1,1.5-2.4,2.4-15.2,2.4-27.6s-.6-21.5-2-24.7c9,2.1,14.3-.8,22-.8,12.1,0,22.4,7.4,22.4,26.7s-8.2,27.5-25.1,27.5ZM65,53.4c7.8.3,10.6-17.7,10.6-28.2S72.7.6,65,.8c-.6,8.300-1,17.3-1,26.3s.3,18,1,26.3Z"/><path d="M17.4,90c-1-1.5-1.5-6.6-1.5-11.7s.4-9.8,1.4-11.1c-3.5.3-8,1.3-11.6,1.3s-3.7-.3-4.9-1.3c-1.1,3.2,0,5.7,2.3,5.7s3.4-3.8,6.8-4.4c.4,2.5.7,6.5.8,9.4h-1.2c-1.7,0-4-1.6-5-3.6.3,2.5.3,5,0,7.5,1.4-2.5,3.4-3.5,5-3.5h1.2c0,3.6-.2,8-1,11C7.2,88.9,2.2,86.4,0,84v6.1c2.5-.2,5.7-.4,8.9-.4s5.8.1,8.500.4Z"/><path d="M33.6,90c-.9-1.3-1.8-7.2-1.8-12.8s.5-8.3,1.8-10c-1.5.3-2.9.4-4.4.4s-2.9-.1-4.4-.4c1.7,2.7,2.5,7.6,2.5,12.4s-.4,7.1-1.2,9.7c-1.9,0-6.2-2.5-7.6-5.3v6.1c2.5-.2,5.1-.4,7.8-.4s4.9.1,7.4.4Z"/><path d="M49.8,90c-.9-1.3-1.8-7.2-1.8-12.8s.5-8.3,1.8-10c-1.5.3-2.9.4-4.4.4s-2.9-.1-4.4-.4c1.7,2.7,2.5,7.6,2.5,12.4s-.4,7.1-1.2,9.7c-1.9,0-6.2-2.5-7.6-5.3v6.1c2.5-.2,5.1-.4,7.8-.4s4.9.1,7.4.4Z"/><path d="M61.8,90.5c7.2,0,10.5-5.1,10.5-11.8s-3.3-11.9-10.5-11.9-10.5,4.3-10.5,11.900,3.3,11.8,10.5,11.8ZM61.8,90.2c-2.3,0-3.3-5.8-3.3-11.5s1.1-11.6,3.3-11.6,3.3,5.8,3.3,11.6-1.1,11.5-3.3,11.5Z"/><path d="M84.5,90.5c2.8,0,5.6-1,8.6-.5-.7-1-1-6.7-1-12.1s.3-9.4.9-10.8c-3.9.9-6.3-.3-9.6-.3-5.3,0-9.8,3.2-9.8,11.7s3.6,12,11,12ZM85,90.1c-3.4.1-4.6-7.8-4.6-12.3s1.3-10.7,4.6-10.7c.3,3.6.4,7.6.4,11.5s-.1,7.9-.4,11.5Z"/><path d="M62,119.5c1.5-2.7,3.4-8.3,4.4-14,.5-3.1.8-6.1.6-8.8,3,.9,7.7.8,9.2,0-.1,2.4.3,5.2.9,8,1.2,5.8,3.9,12.2,5.7,14.8-2.3-.6-4.4-.6-6.7,0,.5-1.8.7-3.7.8-5.6,0-1.9,0-3.8,0-5.7h-4.3c-.4,1.8-.7,3.6-.8,5.5-.2,2-.1,4.1.2,5.8-3.7-.6-6.2-.6-9.8,0ZM72.5,107.9h4.2c-.6-4.8-1.1-8.2-1.1-10.4-.5,1.4-2.1,5.4-3.1,10.4Z"/><path d="M48.2,119.5c0-2.9-.6-7.4-1.8-12-1.1-3.9-2.7-7.9-4.8-11,.9.4,2.3.6,3.9.6s4.3-.3,5.9-.6c0,.8,0,1.6,0,2.4.1,5.7,2.9,16.7,4.7,19.6,1-3.5,2.2-12.2,2.3-17.7.1-1.5.3-3,.1-4.2.8.2,1.5.3,2.3.3s1.4,0,2.4-.3c-1.3,1.5-2.9,6.3-4.1,11.2-1.300,4.9-2.3,9.8-2.5,11.6-1.5-.3-2.9-.5-4.2-.5s-2.6.2-4.2.5Z"/><path d="M32.2,119.5c1.1-2,1.7-6.6,1.7-11.2s-.6-9.5-1.6-11.6c2.7.5,5.5.5,8.1,0-.7,1.9-1.1,6-1.1,10.3s.5,10.4,1.5,12.5c-2.6-.6-6-.5-8.7,0Z"/><path d="M19.8,120c-2.8,0-5.6-1-8.6-.5.7-1,1-6.7,1-12.1s-.3-9.4-.9-10.8c3.9.9,6.3-.3,9.6-.3,5.3,0,9.8,3.2,9.8,11.7s-3.600,12-11,12ZM19.3,119.6c3.4.1,4.6-7.8,4.6-12.3s-1.3-10.7-4.6-10.7c-.3,3.6-.4,7.6-.4,11.5s.1,7.9.4,11.5Z"/></g></svg></div>
+  <div class="titles"><h1>Dolle Diva · Maandrapport</h1><p>Wat leverde de marketing op?</p></div>
+  <label class="ctrl"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 16H5V9h14v11Z"/></svg>
+    <select id="month" aria-label="Maand"></select></label>
+</header>
+<div class="wrap">
+  <div class="demo"><b>Voorbeelddata.</b> Gesimuleerde cijfers rond het plan (€ 1.500 per maand, doel € 125 per boeking). Omzet = boekingen × € 500 (aanname). Zodra het CRM (Sheet), Google Ads en Meta gekoppeld zijn, staan hier de echte cijfers.</div>
+  <div class="sheet">
+    <div class="q"><b>Vraag van dit rapport:</b> wat leverde het op?</div>
+    <div class="grid g-4" id="scores"></div>
+
+    <div class="grid g-2 mt">
+      <div class="comp">
+        <h3>Boekingen per maand</h3><div class="sub">laatste 6 maanden, zakelijk en privé</div>
+        <div class="legend"><span><i style="background:var(--zak)"></i>Zakelijk</span><span><i style="background:var(--priv)"></i>Privé</span></div>
+        <div class="chart"><canvas id="c-book" role="img" aria-label="Boekingen per maand, laatste 6 maanden"></canvas></div>
+      </div>
+      <div class="comp">
+        <h3>Kosten per boeking per maand</h3><div class="sub">laatste 6 maanden · lager is beter</div>
+        <div class="legend"><span><i style="background:var(--bordeaux)"></i>Kosten per boeking</span><span><i class="dash"></i>Doel € 125</span></div>
+        <div class="chart"><canvas id="c-cpb" role="img" aria-label="Kosten per boeking per maand, laatste 6 maanden"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid g-21 mt">
+      <div class="comp">
+        <h3>Aanvragen: zakelijk versus privé, per kanaal</h3><div class="sub">aantal aanvragen in de gekozen maand</div>
+        <div class="legend"><span><i style="background:var(--zak)"></i>Zakelijk</span><span><i style="background:var(--priv)"></i>Privé</span></div>
+        <div class="seg" id="seg"></div>
+      </div>
+      <div class="comp">
+        <h3>Aanvragen per type</h3><div class="sub">en hoeveel daarvan echt boekten</div>
+        <table class="tbl" id="types"></table>
+      </div>
+    </div>
+
+    <div class="comp lessons mt">
+      <h3>Lessen en volgende acties</h3>
+      <div class="ls" id="lessons"></div>
+    </div>
+  </div>
+  <footer><span>Bronnen: CRM (Sheet) · Google Ads · Meta</span><span>Looker Studio-opmaak · maandelijks</span></footer>
+</div>
+
+<script>
+/* Dolle Diva — shared DEMO data for klant v2 + intern v2.
+   Simulated, deterministic. Replace with real GA4 / Google Ads / Meta / CRM data once linked.
+   Range: 1 May 2026 – 9 Nov 2026 (data up to "yesterday"). */
+const DD = (() => {
+  let seed = 20261109;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+
+  const TYPES = ['Bedrijfsfeest','Zakelijk diner','Kerstborrel','Verjaardag','Vriendinnenavond','Babyshower','Dinnershow'];
+  const SEG = [0,0,0,1,1,1,1]; // 0 = zakelijk, 1 = privé
+  const AVG_BOOKING = 500;      // aanname: gemiddelde omzet per boeking
+  const PLAN = {cost:1500, aanv:57, kwal:34, boek:12}; // per maand
+  const NORM = {
+    'Google Ads': {ctr:{min:.05, max:null, scale:.15}, cr:{min:.04}, cpl:{max:40}},
+    'Meta':       {ctr:{min:.008, max:.02, scale:.04}, cr:{min:.015}, cpl:{max:25}},
+  };
+
+  // units = Google campaigns, and Meta ads (an ad belongs to a campaign)
+  const U = [
+    {ch:'Google Ads', camp:'Search · Bedrijfsfeest Amersfoort', ad:null, clicks:9,   cpc:1.85, ctr:.068, pA:.049, z:.85},
+    {ch:'Google Ads', camp:'Search · Groepsdiner zakelijk',     ad:null, clicks:8,   cpc:1.60, ctr:.061, pA:.046, z:.70},
+    {ch:'Google Ads', camp:'Search · Brand Dolle Diva',         ad:null, clicks:7,   cpc:.45,  ctr:.140, pA:.060, z:.35},
+    {ch:'Meta', camp:'Meta · Binnenkort jarig',      ad:'Reel · Taart met sterretjes',             fmt:'Reel',      clicks:4.5, cpc:.75, ctr:.014, pA:.028, z:.05, thumb:.34},
+    {ch:'Meta', camp:'Meta · Binnenkort jarig',      ad:'Foto · Champagnetoren',                   fmt:'Foto',      clicks:3.5, cpc:.80, ctr:.012, pA:.028, z:.05},
+    {ch:'Meta', camp:'Meta · Feestjes Reels',        ad:'Reel · Polonaise onder de kroonluchters', fmt:'Reel',      clicks:6,   cpc:.62, ctr:.018, pA:.021, z:.08, thumb:.38, fatigue:'2026-09-28'},
+    {ch:'Meta', camp:'Meta · Feestjes Reels',        ad:'Reel · Dinnershow highlights',            fmt:'Reel',      clicks:3,   cpc:.70, ctr:.015, pA:.021, z:.08, thumb:.29, start:'2026-10-20'},
+    {ch:'Meta', camp:'Meta · Retargeting bezoekers', ad:'Carrousel · Menu & cocktails',            fmt:'Carrousel', clicks:4,   cpc:1.10, ctr:.019, pA:.042, z:.20},
+  ];
+  const MONTHF = {4:.85, 5:.9, 6:.8, 7:.85, 8:1.0, 9:1.05, 10:1.08}; // May..Nov (0-based month)
+  const DOWF = [0.9,0.8,0.85,0.95,1.05,1.25,1.2];
+  const START = new Date(2026, 4, 1), END = new Date(2026, 10, 9);
+  const day = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+  const DAYS = Math.round((END - START) / 864e5) + 1;
+
+  const rows = [];
+  for (let d = 0; d < DAYS; d++){
+    const date = new Date(START); date.setDate(START.getDate() + d);
+    const mo = date.getMonth(), f = DOWF[date.getDay()] * MONTHF[mo];
+    const xmas = mo >= 8 ? (mo >= 9 ? 1.35 : 1.15) : 1;           // more business requests towards December
+    const consent = Math.min(.8, Math.max(.4, .6 + .06*Math.sin(d/9) + .05*(rnd()-.5)));
+    const gclidP = .45 + .25 * d / DAYS;                            // gclid capture improves over time
+    U.forEach((u, ui) => {
+      if (u.start && date < day(u.start)) return;
+      const live = Math.floor((date - (u.start ? day(u.start) : START)) / 864e5);
+      const fat = u.fatigue && date >= day(u.fatigue) ? Math.max(.5, 1 - .012 * (date - day(u.fatigue)) / 864e5) : 1;
+      const clicks = Math.max(0, Math.round(u.clicks * f * (0.75 + 0.5*rnd())));
+      const cost = clicks * u.cpc * (0.88 + 0.24*rnd());
+      const impr = Math.round(clicks / (u.ctr * fat * (0.85 + 0.3*rnd()))) || Math.round(u.clicks / u.ctr * .5);
+      const r = {d, date, ui, ch:u.ch, camp:u.camp, ad:u.ad, clicks, cost, impr, live, fat,
+                 a:[0,0], k:[0,0], b:[0,0], t:Array(TYPES.length).fill(0), tb:Array(TYPES.length).fill(0), gclid:0, consent};
+      const zP = Math.min(.95, u.z * xmas);
+      for (let i = 0; i < clicks; i++) if (rnd() < u.pA * (u.ch === 'Meta' ? fat**.5 : 1)) {
+        const seg = rnd() < zP ? 0 : 1;
+        let ty; if (seg === 0) { const w = mo >= 8 ? [45,35,20] : [55,45,0]; ty = pick(w); }
+                else { ty = 3 + pick(u.camp.includes('Reels') ? [20,15,10,55] : u.camp.includes('jarig') ? [60,25,8,7] : [35,30,15,20]); }
+        r.a[seg]++; r.t[ty]++;
+        if (u.ch === 'Google Ads' && rnd() < gclidP) r.gclid++;
+        if (rnd() < (seg ? .52 : .70)) { r.k[seg]++; if (rnd() < (seg ? .31 : .40)) { r.b[seg]++; r.tb[ty]++; } }
+      }
+      rows.push(r);
+    });
+  }
+  function pick(w){ const s = w.reduce((a,b)=>a+b,0); let x = rnd()*s; for (let i = 0; i < w.length; i++){ x -= w[i]; if (x <= 0) return i; } return 0; }
+
+  const sum = (arr, fn) => arr.reduce((a, r) => a + fn(r), 0);
+  const agg = arr => {
+    const o = {clicks:sum(arr,r=>r.clicks), cost:sum(arr,r=>r.cost), impr:sum(arr,r=>r.impr),
+               aZ:sum(arr,r=>r.a[0]), aP:sum(arr,r=>r.a[1]), kZ:sum(arr,r=>r.k[0]), kP:sum(arr,r=>r.k[1]), bZ:sum(arr,r=>r.b[0]), bP:sum(arr,r=>r.b[1]),
+               gclid:sum(arr,r=>r.gclid), gLeads:sum(arr.filter(r=>r.ch==='Google Ads'), r=>r.a[0]+r.a[1])};
+    o.aanv = o.aZ + o.aP; o.kwal = o.kZ + o.kP; o.boek = o.bZ + o.bP; o.omzet = o.boek * AVG_BOOKING;
+    return o;
+  };
+  return {rows, U, TYPES, SEG, AVG_BOOKING, PLAN, NORM, START, END, DAYS, agg, sum, rnd};
+})();
+
+</script>
+<script>
+(() => {
+const {rows, TYPES, SEG, AVG_BOOKING, PLAN, agg} = DD;
+const nf = new Intl.NumberFormat('nl-NL'), ef = new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const MONTHS = [4,5,6,7,8,9]; // May..Oct 2026 (complete months)
+const mName = m => new Date(2026, m, 1).toLocaleDateString('nl-NL',{month:'long'});
+const mShort = m => new Date(2026, m, 1).toLocaleDateString('nl-NL',{month:'short'}).replace('.','');
+const sel = document.getElementById('month');
+sel.innerHTML = MONTHS.slice().reverse().map(m => `<option value="${m}">${mName(m)[0].toUpperCase()+mName(m).slice(1)} 2026</option>`).join('');
+const inM = m => rows.filter(r => r.date.getMonth() === m);
+const roas = a => a.cost ? a.omzet / a.cost : 0;
+const x1 = v => v.toLocaleString('nl-NL',{minimumFractionDigits:1,maximumFractionDigits:1});
+
+function delta(cur, prev, lowerBetter){
+  if (!prev || !isFinite(prev)) return '<span class="delta flat">eerste maand</span>';
+  const ch = (cur - prev) / prev, good = lowerBetter ? ch < 0 : ch > 0;
+  if (Math.abs(ch) < .005) return '<span class="delta flat">gelijk</span>';
+  return `<span class="delta ${good?'up':'down'}">${ch>0?'▲':'▼'} ${Math.abs(Math.round(ch*100))}%</span>`;
+}
+
+Chart.defaults.font.family = 'Roboto, system-ui, sans-serif'; Chart.defaults.font.size = 12; Chart.defaults.color = '#5F6368';
+Chart.defaults.plugins.legend.display = false; Chart.defaults.maintainAspectRatio = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#202124'; Chart.defaults.plugins.tooltip.padding = 10;
+const grid = {color:'#EEF0F2', drawTicks:false};
+const charts = {};
+const mk = (id, cfg) => { charts[id]?.destroy(); charts[id] = new Chart(document.getElementById(id), cfg); };
+
+function render(){
+  const m = +sel.value, c = agg(inM(m)), p = MONTHS.includes(m-1) ? agg(inM(m-1)) : null;
+  const cpb = c.boek ? c.cost / c.boek : 0, pcpb = p && p.boek ? p.cost / p.boek : null;
+  const cards = [
+    ['Boekingen', nf.format(c.boek), delta(c.boek, p?.boek), `plan ${PLAN.boek} · ${c.bZ} zakelijk, ${c.bP} privé`, ''],
+    ['Geschatte omzet', ef.format(c.omzet), delta(c.omzet, p?.omzet), `plan ${ef.format(PLAN.boek*AVG_BOOKING)} · ${c.boek} boekingen × gemiddeld € ${AVG_BOOKING}`, 'hero2'],
+    ['Kosten per boeking', c.boek ? ef.format(cpb) : '–', delta(cpb, pcpb, true), `doel € 125 · mediabudget ${ef.format(c.cost)}`, 'hero'],
+    ['Rendement op media', x1(roas(c)) + '×', delta(roas(c), p ? roas(p) : null), `plan ${x1(PLAN.boek*AVG_BOOKING/PLAN.cost)}× · € ${x1(roas(c))} omzet per € 1 media`, ''],
+  ];
+  document.getElementById('scores').innerHTML = cards.map(([l,v,d,ln,cls]) =>
+    `<div class="comp score ${cls}"><div class="lab">${l}</div><div class="val">${v}</div>${d} <span style="font-size:12px;opacity:.8">vs vorige maand</span><div class="ln">${ln}</div></div>`).join('');
+
+  // 6-month trend
+  const months = MONTHS.filter(x => x <= m).slice(-6), A = months.map(x => agg(inM(x)));
+  const hl = (col, i) => months[i] === m ? col : col + '99';
+  mk('c-book', {type:'bar', data:{labels:months.map(mShort), datasets:[
+      {label:'Zakelijk', data:A.map(a=>a.bZ), backgroundColor:months.map((_,i)=>hl('#3E6FB0',i)), borderColor:'#fff', borderWidth:{top:2}, borderRadius:4, borderSkipped:'bottom', maxBarThickness:44},
+      {label:'Privé', data:A.map(a=>a.bP), backgroundColor:months.map((_,i)=>hl('#C08A1E',i)), borderColor:'#fff', borderWidth:{top:2}, borderRadius:4, borderSkipped:'bottom', maxBarThickness:44}]},
+    options:{interaction:{mode:'index', intersect:false}, scales:{x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, grid, border:{display:false}, ticks:{precision:0, padding:6}}},
+      plugins:{tooltip:{callbacks:{label:c => ` ${c.dataset.label}: ${c.parsed.y}`, footer:it => `Totaal: ${it.reduce((s,i)=>s+i.parsed.y,0)} boekingen`}}}}});
+  const goal = {id:'goal', afterDatasetsDraw(ch){ const {ctx, chartArea:a, scales:{y}} = ch, py = y.getPixelForValue(125); ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle='#202124'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(a.left,py); ctx.lineTo(a.right,py); ctx.stroke(); ctx.restore(); }};
+  const cpbs = A.map(a => a.boek ? Math.round(a.cost/a.boek) : null);
+  mk('c-cpb', {type:'line', data:{labels:months.map(mShort), datasets:[{data:cpbs, borderColor:'#891729', backgroundColor:'#891729', borderWidth:2, tension:.25,
+      pointRadius:months.map(x=>x===m?6:4), pointBackgroundColor:cpbs.map(v=>v<=125?'#188038':'#891729'), pointBorderColor:'#fff', pointBorderWidth:2, pointHoverRadius:7}]},
+    options:{scales:{x:{grid:{display:false}}, y:{beginAtZero:true, suggestedMax:220, grid, border:{display:false}, ticks:{callback:v=>'€ '+v, padding:6}}},
+      plugins:{tooltip:{callbacks:{label:c => ` ${ef.format(c.parsed.y)} per boeking ${c.parsed.y<=125?'(onder doel)':'(boven doel)'}`}}}}, plugins:[goal]});
+
+  // zakelijk vs privé per channel
+  const ch = ['Google Ads','Meta'].map(n => ({n, ...agg(inM(m).filter(r=>r.ch===n))}));
+  const max = Math.max(...ch.map(x=>x.aanv));
+  document.getElementById('seg').innerHTML = ch.map(x => {
+    const w = x.aanv / max * 100;
+    return `<div class="row"><span class="nm">${x.n}</span><div class="bar" style="width:${w}%" title="${x.n}: ${x.aZ} zakelijk, ${x.aP} privé">
+      <span style="flex:${x.aZ};background:var(--zak)">${x.aZ ? x.aZ+' zak.' : ''}</span><span class="p" style="flex:${x.aP};background:var(--priv)">${x.aP ? x.aP+' privé' : ''}</span></div><span class="tot">${x.aanv}</span></div>`;
+  }).join('') + `<div style="font-size:12.5px;color:var(--ink-2);margin-top:4px">Google Search brengt vooral <b>zakelijke</b> aanvragen (mensen zoeken actief), Meta vooral <b>privé</b> (verjaardagen, vriendinnen).</div>`;
+
+  // types table
+  const T = Array(TYPES.length).fill(0), B = Array(TYPES.length).fill(0);
+  inM(m).forEach(r => r.t.forEach((v,i) => { T[i] += v; B[i] += r.tb[i]; }));
+  const list = TYPES.map((n,i) => ({n, z:SEG[i]===0, a:T[i], b:B[i]})).filter(x => x.a).sort((a,b) => b.a - a.a);
+  document.getElementById('types').innerHTML = '<thead><tr><th>Type</th><th>Aanvragen</th><th>Boekingen</th></tr></thead><tbody>' +
+    list.map(x => `<tr><td>${x.n}<span class="chip ${x.z?'z':'p'}">${x.z?'zakelijk':'privé'}</span></td><td>${x.a}</td><td>${x.b}</td></tr>`).join('') + '</tbody>';
+
+  // lessons (plain language, three points)
+  const L = [];
+  const trend = A.length >= 3 ? (A.slice(-3).reduce((s,a)=>s+(a.boek?a.cost/a.boek:0),0)/3) : cpb;
+  L.push(cpb <= 125
+    ? [`Een boeking kostte deze maand <b>${ef.format(cpb)}</b> aan advertenties, onder het doel van € 125. Elke euro media leverde ongeveer € ${x1(roas(c))} omzet op.`, `<b>Volgende stap:</b> het budget voorzichtig verhogen in de campagnes die de meeste boekingen geven, en kijken of de kosten per boeking onder € 125 blijven.`]
+    : [`Een boeking kostte deze maand <b>${ef.format(cpb)}</b> aan advertenties, boven het doel van € 125${trend <= 125 ? ', terwijl het gemiddelde van de laatste maanden wel onder het doel ligt' : ''}.`, `<b>Volgende stap:</b> budget weghalen bij wat weinig boekt, en de opvolging van aanvragen checken. Snel terugbellen = meer boekingen.`]);
+  const cg = ch[0], cm = ch[1], cpbG = cg.boek ? cg.cost/cg.boek : Infinity, cpbM = cm.boek ? cm.cost/cm.boek : Infinity;
+  const best = cpbG <= cpbM ? cg : cm, other = best === cg ? cm : cg;
+  L.push([`<b>${best.n}</b> gaf de goedkoopste boekingen (${best.boek} boekingen, ${isFinite(best.cost/best.boek)?ef.format(best.cost/best.boek):'–'} per stuk). ${other.n}: ${other.boek} boekingen${other.boek?`, ${ef.format(other.cost/other.boek)} per stuk`:''}.`,
+          `<b>Volgende stap:</b> ${best===cg ? 'zakelijke zoekcampagnes (bedrijfsfeest, groepsdiner) voorrang geven, Meta houden voor zichtbaarheid en verjaardagen.' : 'meer inzetten op Meta-video’s die werken, en de Google-zoekwoorden kritisch nalopen.'}`]);
+  const zs = c.aanv ? c.aZ / c.aanv : 0, pzs = p && p.aanv ? p.aZ / p.aanv : zs, kb = T[2];
+  L.push(kb > 0
+    ? [`<b>${Math.round(zs*100)}%</b> van de aanvragen was zakelijk${Math.abs(zs-pzs) > .04 ? ` (vorige maand ${Math.round(pzs*100)}%)` : ''}, en er kwamen al <b>${kb} kerstborrel-aanvragen</b> binnen.`, `<b>Volgende stap:</b> de kerstcampagne nu aanzetten en een kerstpakket voor bedrijven op de website zetten, voordat de agenda's in december vol zitten.`]
+    : [`<b>${Math.round(zs*100)}%</b> van de aanvragen was zakelijk, ${Math.round((1-zs)*100)}% privé.`, `<b>Volgende stap:</b> voor zakelijk de bedrijfsfeest-pagina sterker maken (capaciteit, AV, parkeren). Voor privé de verjaardags-video's blijven vernieuwen.`]);
+  document.getElementById('lessons').innerHTML = L.map(([les, act], i) => `<div class="l"><span class="n">${i+1}</span><p>${les}</p><p class="act">${act}</p></div>`).join('');
+}
+sel.onchange = () => { render(); try { localStorage.setItem('ddk2-m', sel.value); } catch(e){} };
+try { const v = localStorage.getItem('ddk2-m'); if (v && MONTHS.includes(+v)) sel.value = v; } catch(e){}
+render();
+})();
+</script>
+</body>
+</html>
