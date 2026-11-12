@@ -122,7 +122,7 @@ footer p{font-size:13px;color:var(--muted);margin-top:8px}
   <div class="wrap hero__inner">
    <div class="hero__text">
     <span class="script">Not here to fit in, but to stand out</span>
-    <h1>Van 1.360 kliks naar <em>12&nbsp;boekingen</em>: €&nbsp;125 per&nbsp;boeking</h1>
+    <h1>Van 1.460 kliks naar <em>14&nbsp;boekingen</em>: €&nbsp;107 per&nbsp;boeking</h1>
     <p class="lead">Verwachte maand bij € 1.500 mediabudget, op basis van de aannames in de tekst.</p>
    </div>
     <div class="brand">
@@ -147,30 +147,30 @@ footer p{font-size:13px;color:var(--muted);margin-top:8px}
       <canvas id="cv" aria-hidden="true"></canvas>
 
       <div class="col stage" data-i="0">
-        <div class="stage__name">Kliks <small>Search + Meta</small></div>
-        <div class="stage__n" data-count="1360">1.360</div>
-        <div class="stage__cost"><span>per klik</span><b>€ 1,10</b></div>
+        <div class="stage__name">Kliks <small>Search + Instagram</small></div>
+        <div class="stage__n" data-count="1460">1.460</div>
+        <div class="stage__cost"><span>per klik</span><b>€ 1,03</b></div>
       </div>
-      <div class="col conv"><span class="pill"><span class="arr">↓</span>4,2%</span><span class="txt">gaat door naar een aanvraag</span></div>
+      <div class="col conv"><span class="pill"><span class="arr">↓</span>4,5%</span><span class="txt">gaat door naar een aanvraag</span></div>
 
       <div class="col stage" data-i="1">
         <div class="stage__name">Aanvragen</div>
-        <div class="stage__n" data-count="57">57</div>
-        <div class="stage__cost"><span>per aanvraag</span><b>€ 26</b></div>
+        <div class="stage__n" data-count="66">66</div>
+        <div class="stage__cost"><span>per aanvraag</span><b>€ 23</b></div>
       </div>
-      <div class="col conv"><span class="pill"><span class="arr">↓</span>59,6%</span><span class="txt">is gekwalificeerd</span></div>
+      <div class="col conv"><span class="pill"><span class="arr">↓</span>60,6%</span><span class="txt">is gekwalificeerd</span></div>
 
       <div class="col stage" data-i="2">
         <div class="stage__name">Gekwalificeerd</div>
-        <div class="stage__n" data-count="34">34</div>
-        <div class="stage__cost"><span>per lead</span><b>€ 44</b></div>
+        <div class="stage__n" data-count="40">40</div>
+        <div class="stage__cost"><span>per lead</span><b>€ 38</b></div>
       </div>
-      <div class="col conv"><span class="pill"><span class="arr">↓</span>35,3%</span><span class="txt">boekt echt</span></div>
+      <div class="col conv"><span class="pill"><span class="arr">↓</span>35%</span><span class="txt">boekt echt</span></div>
 
       <div class="col stage stage--win" data-i="3">
         <div class="stage__name">Geboekt ✦</div>
-        <div class="stage__n" data-count="12">12</div>
-        <div class="stage__cost"><span>per boeking</span><b>€ 125</b></div>
+        <div class="stage__n" data-count="14">14</div>
+        <div class="stage__cost"><span>per boeking</span><b>€ 107</b></div>
       </div>
     </div>
 
@@ -182,9 +182,9 @@ footer p{font-size:13px;color:var(--muted);margin-top:8px}
 
   <section class="kpis" aria-label="Kerncijfers">
     <div class="kpi"><span>Mediabudget</span><b>€ 1.500</b></div>
-    <div class="kpi"><span>Klik → boeking</span><b>0,88%</b></div>
-    <div class="kpi"><span>Kliks per boeking</span><b>≈ 113</b></div>
-    <div class="kpi kpi--hot"><span>Kosten per boeking</span><b>€ 125</b></div>
+    <div class="kpi"><span>Klik → boeking</span><b>0,96%</b></div>
+    <div class="kpi"><span>Kliks per boeking</span><b>≈ 104</b></div>
+    <div class="kpi kpi--hot"><span>Kosten per boeking</span><b>€ 107</b></div>
   </section>
 
 </main>
@@ -197,8 +197,8 @@ footer p{font-size:13px;color:var(--muted);margin-top:8px}
 
 <script>
 (() => {
-  const STAGES = [1360, 57, 34, 12];
-  const RATES  = [57/1360, 34/57, 12/34];
+  const STAGES = [1460, 66, 40, 14];
+  const RATES  = [66/1460, 40/66, 14/40];
   const WIDTH  = STAGES.map(n => Math.max(0.16, Math.pow(n/STAGES[0], 0.32)));
   const COLORS = [[233,108,89],[249,206,202],[254,248,249],[246,201,124]];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
